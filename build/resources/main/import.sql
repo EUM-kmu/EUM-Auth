@@ -1,0 +1,1 @@
+INSERT INTO user(user_id,email,password,role,is_banned,is_deleted) values (1,"test@email","$2a$10$iPFzYQC.Yw/fESftpYk.TOBQqIX18dD14E7A6y.eV/BrTSxCDKvI.","TEST",0,0),(2,"test2@email","$2a$10$iPFzYQC.Yw/fESftpYk.TOBQqIX18dD14E7A6y.eV/BrTSxCDKvI.","TEST",0,0);
