@@ -20,13 +20,15 @@ public class User {
     private String uid;
     private String email;
     private String password;
-    private String phone;
-    private String bankAccount;
     private Boolean isBanned;
     private boolean isDeleted;
 
     public void setDeleted() {
         isDeleted = true;
+    }
+
+    public void updateRole(Role role) {
+        this.role = role;
     }
 
     @Column

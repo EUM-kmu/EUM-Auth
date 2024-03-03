@@ -5,7 +5,7 @@ spring:
   cloud:
     config:
       uri: http://localhost:8888
-      name: gateway-service
+      name:
       enabled: false
   application:
     name: auth-service
@@ -17,15 +17,12 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto:  update
       dialect: org.hibernate.dialect.MySQLDialect # ??? ??
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect # ?? ?? ??
     generate-ddl: true
-  data:
-    redis:
-      port: 6379
 eureka:
   #  instance:
   #    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}

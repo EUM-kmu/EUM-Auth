@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @Service
 public class UsersService {
-    private final UserRepository usersRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -41,7 +41,7 @@ public class UsersService {
      * @return
      */
     public APIResponse<UsersResponse.TokenInfo> signIn(UsersRequest.SignIn signIn) {
-        User getUser = usersRepository.findByEmail(signIn.getEmail()).orElseThrow(() -> new IllegalArgumentException("잘못된 이메일 정보"));
+        User getUser = userRepository.findByEmail(signIn.getEmail()).orElseThrow(() -> new IllegalArgumentException("잘못된 이메일 정보"));
         if(!passwordEncoder.matches(signIn.getPassword(),getUser.getPassword())) throw new IllegalArgumentException("잘못된 비밀번호");
         CustomUserInfoDto userInfo = modelMapper.map(getUser, CustomUserInfoDto.class);
         UsersResponse.TokenInfo  tokenInfo = jwtTokenProvider.generateToken(userInfo,getUser.getRole());
@@ -124,14 +124,14 @@ public class UsersService {
     public APIResponse<UsersResponse.TokenInfo> getToken(String email, String uid, SocialType socialType){
         UsersResponse.TokenInfo tokenInfo = null;
         Role role;
-        if(usersRepository.existsByUid(uid)){
-            User getUser = usersRepository.findByUid(uid).get();
+        if(userRepository.existsByUid(uid)){
+            User getUser = userRepository.findByUid(uid).get();
             CustomUserInfoDto info = modelMapper.map(getUser, CustomUserInfoDto.class);
-            if(usersRepository.existsByUidAndRole(uid,Role.ROLE_USER)){ //활동 가능한 유저
+            if(userRepository.existsByUidAndRole(uid,Role.ROLE_USER)){ //활동 가능한 유저
                 role = Role.ROLE_USER;
                 tokenInfo = jwtTokenProvider.generateToken(info,role);
-            } else if (usersRepository.existsByUidAndRole(uid,Role.ROLE_UNPROFILE_USER) ||usersRepository.existsByUidAndRole(uid,Role.ROLE_UNPASSWORD_USER )) {
-                role = usersRepository.findByUid(uid).get().getRole();
+            } else if (userRepository.existsByUidAndRole(uid,Role.ROLE_UNPROFILE_USER) || userRepository.existsByUidAndRole(uid,Role.ROLE_UNPASSWORD_USER )) {
+                role = userRepository.findByUid(uid).get().getRole();
                 tokenInfo = jwtTokenProvider.generateToken(info,role);
             }
         }else{ //이메일이 없으면 최초 가입 유저 == 프로필이 없는 상태
@@ -153,8 +153,20 @@ public class UsersService {
      * @return
      */
     public APIResponse<UsersResponse.UserRole> validateToken(Long userId) {
-        User getUser = usersRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("invalid userId"));
+        User getUser = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("invalid userId"));
         return APIResponse.of(SuccessCode.SELECT_SUCCESS, UsersResponse.UserRole.builder().role(getUser.getRole()).build());
+    }
+
+    public UsersResponse.TokenInfo updateRoleAndToken(Role role, Long userId){
+        User getUser = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NullPointerException("invalid userId"));
+        getUser.updateRole(role);
+        userRepository.save(getUser);
+
+        CustomUserInfoDto userInfo = modelMapper.map(getUser, CustomUserInfoDto.class);
+        UsersResponse.TokenInfo tokenInfo = jwtTokenProvider.generateToken(userInfo,getUser.getRole());
+        redisTemplate.opsForValue()
+                .set("RT:" + getUser.getUserId(), tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
+        return tokenInfo;
     }
 
 //    /**
