@@ -9,7 +9,6 @@ public class ProfileRequest {
     @Getter
     @Setter
     public static class CreateProfile{
-        private Long userId;
         private String nickname;
 
 

@@ -5,13 +5,16 @@ import com.eum.auth.controller.DTO.request.ProfileRequest;
 import com.eum.auth.controller.DTO.response.ProfileResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+
 @RequiredArgsConstructor
 @Service
 public class ProfileService {
     private final HaetsalServiceClient haetsalServiceClient;
-    public ProfileResponseDTO.ProfileResponse create(ProfileRequest.CreateProfile createProfile, MultipartFile multipartFile) {
+    public ProfileResponseDTO.ProfileResponse create(ProfileRequest.CreateProfile createProfile,String userId) {
+
+        ProfileResponseDTO.ProfileResponse profileResponse = haetsalServiceClient.createProfile(createProfile,userId);
 
 
+        return profileResponse;
     }
 }

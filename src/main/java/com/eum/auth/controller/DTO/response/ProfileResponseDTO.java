@@ -13,8 +13,15 @@ public class ProfileResponseDTO {
             private String nickName;
             private String address;
             private String profileImage; //네이버 클라우드 Url
-
         }
+    @Getter
+    @Setter
+    @Builder
+    public static class ProfileResponseWithToken {
+        private ProfileResponse profile;
+        private UsersResponse.TokenInfo tokenInfo;
+    }
+
 
 
 
