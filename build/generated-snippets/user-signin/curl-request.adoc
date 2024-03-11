@@ -1,0 +1,6 @@
+[source,bash]
+----
+$ curl 'http://localhost:8080/auth-service/api/v2/auth/signin/local' -i -X POST \
+    -H 'Content-Type: application/json;charset=UTF-8' \
+    -d '{"password":"1234","email":"test3@email"}'
+----

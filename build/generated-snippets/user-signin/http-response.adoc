@@ -1,0 +1,17 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+Content-Type: application/json
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Length: 475
+
+{"status":200,"code":"200","msg":"SELECT SUCCESS","detailMsg":"","data":{"grantType":"Bearer","accessToken":"eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMsInVpZCI6ImxvY2FsMyIsInJvbGUiOiJST0xFX1VOUEFTU1dPUkRfVVNFUiIsImlhdCI6MTcwOTcxNDQ5OCwiZXhwIjoxNzUyOTE0NDk4fQ.Do1tM8aELqQAsTt541UAtTkmhx8GkwpEm0r8E7i4BnU","refreshToken":"eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjIzMTQ1MTQ0OTh9.L2zeULuaoAH6EL_trd6bHDaxWW9d9E52BaVvOCQXTaM","refreshTokenExpirationTime":604800000,"role":"ROLE_UNPASSWORD_USER"}}
+----
