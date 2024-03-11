@@ -34,4 +34,4 @@ eureka:
 kakao :
   client-id: 1a354a3d4dc989747906944c3c188196
   redirect-url: http://localhost:8081/auth-service/api/v2/auth
-  admin-key: ${admin-key}
+  admin-key: 8a47c46112c97fe1786eb3c247f6d0c9

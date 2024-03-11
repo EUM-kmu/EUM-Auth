@@ -1,0 +1,9 @@
+[source,http,options="nowrap"]
+----
+POST /auth-service/api/v2/auth/signin/local HTTP/1.1
+Content-Type: application/json;charset=UTF-8
+Content-Length: 41
+Host: localhost:8080
+
+{"password":"1234","email":"test3@email"}
+----
