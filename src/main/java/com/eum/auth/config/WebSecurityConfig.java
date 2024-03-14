@@ -46,7 +46,7 @@ public class WebSecurityConfig {
         http.formLogin((form) -> form.disable());
         http.httpBasic(AbstractHttpConfigurer::disable);
 
-        http.addFilterBefore(new JwtAuthenticationFilter( redisTemplate,jwtTokenProvider,customUserDetailsService), UsernamePasswordAuthenticationFilter.class);
+//        http.addFilterBefore(new JwtAuthenticationFilter( redisTemplate,jwtTokenProvider,customUserDetailsService), UsernamePasswordAuthenticationFilter.class);
 
         http.exceptionHandling((exceptionHandling )
                 -> exceptionHandling
