@@ -23,14 +23,14 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect # ?? ?? ??
     generate-ddl: true
-eureka:
-  #  instance:
-  #    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka
+#eureka:
+#  #  instance:
+#  #    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka
 kakao :
   client-id: 1a354a3d4dc989747906944c3c188196
   redirect-url: http://localhost:8081/auth-service/api/v2/auth
