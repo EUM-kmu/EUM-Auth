@@ -53,7 +53,8 @@ public enum ErrorCode {
     NOT_VALID_HEADER_ERROR(404, "G012", "Header에 데이터가 존재하지 않는 경우 "),
 
 //토큰 관련 에러
-    UNAUTHORIZED_ERROR(401, "G008", "Forbidden Exception"),
+    UNAUTHORIZED_ERROR(401, "G020", "Invalid Token Exception"),
+    NO_AUTHORIZATION_HEADER(401, "G021", "no authorization header"),
 
     // 서버가 처리 할 방법을 모르는 경우 발생
     INTERNAL_SERVER_ERROR(500, "G999", "Internal Server Error Exception"),
@@ -96,5 +97,4 @@ public enum ErrorCode {
         this.divisionCode = divisionCode;
         this.message = message;
     }
-//    출처: https://adjh54.tistory.com/79 [Contributor9:티스토리]
 }

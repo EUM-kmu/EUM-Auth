@@ -1,6 +1,6 @@
 package com.eum.auth.config.jwt;
 
-import com.eum.auth.controller.DTO.response.UsersResponse;
+import com.eum.auth.controller.DTO.response.UserResponse;
 import com.eum.auth.domain.CustomUserInfoDto;
 import com.eum.auth.domain.user.Role;
 import com.eum.auth.domain.user.UserRepository;
@@ -48,7 +48,7 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public UsersResponse.TokenInfo generateToken(Authentication authentication) {
+    public UserResponse.TokenInfo generateToken(Authentication authentication) {
         // 권한 가져오기
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -70,14 +70,14 @@ public class JwtTokenProvider {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        return UsersResponse.TokenInfo.builder()
+        return UserResponse.TokenInfo.builder()
                 .grantType(BEARER_TYPE)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .refreshTokenExpirationTime(REFRESH_TOKEN_EXPIRE_TIME)
                 .build();
     }
-    public UsersResponse.TokenInfo generateToken(CustomUserInfoDto user, Role role) {
+    public UserResponse.TokenInfo generateToken(CustomUserInfoDto user, Role role) {
         Claims claims = Jwts.claims();
         claims.put(USER_ID, user.getUserId());
         claims.put(UID, user.getUid());
@@ -130,7 +130,7 @@ public class JwtTokenProvider {
                     .signWith(key, SignatureAlgorithm.HS256)
                     .compact();
 
-            return UsersResponse.TokenInfo.builder()
+            return UserResponse.TokenInfo.builder()
                     .grantType(BEARER_TYPE)
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)

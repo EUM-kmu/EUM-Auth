@@ -1,7 +1,7 @@
 package com.eum.auth.controller;
 
 import com.eum.auth.common.DTO.APIResponse;
-import com.eum.auth.controller.DTO.response.UsersResponse;
+import com.eum.auth.controller.DTO.response.UserResponse;
 import com.eum.auth.domain.user.SocialType;
 import com.eum.auth.service.DTO.KakaoDTO;
 import com.eum.auth.service.FirebaseAuthService;
@@ -9,6 +9,7 @@ import com.eum.auth.service.KakaoService;
 import com.eum.auth.service.UsersService;
 import com.google.firebase.auth.FirebaseAuthException;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
+@Hidden
 @CrossOrigin("*")
 public class KakaoController {
     @Autowired
@@ -30,7 +32,7 @@ public class KakaoController {
 
     //    테스트용 카카오 로그인 사용 x
     @GetMapping("auth-service/api/v2/auth")
-    public ResponseEntity<APIResponse<UsersResponse.TokenInfo>> getToken(@RequestParam String code) throws IOException, FirebaseAuthException {
+    public ResponseEntity<APIResponse<UserResponse.TokenInfo>> getToken(@RequestParam String code) throws IOException, FirebaseAuthException {
         String access = kakaoService.getKakaoAccessT(code);
         KakaoDTO.KaKaoInfo kaKaoInfo = kakaoService.createKakaoUser(access);
 //        log.info(access);
