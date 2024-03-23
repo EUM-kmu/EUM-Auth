@@ -4,7 +4,7 @@ import com.eum.auth.common.DTO.APIResponse;
 import com.eum.auth.common.DTO.enums.SuccessCode;
 import com.eum.auth.config.jwt.JwtTokenProvider;
 import com.eum.auth.controller.DTO.request.UsersRequest;
-import com.eum.auth.controller.DTO.response.UsersResponse;
+import com.eum.auth.controller.DTO.response.UserResponse;
 import com.eum.auth.domain.CustomUserInfoDto;
 import com.eum.auth.domain.user.Role;
 import com.eum.auth.domain.user.SocialType;
@@ -40,14 +40,12 @@ public class UsersService {
      * @param signIn
      * @return
      */
-    public APIResponse<UsersResponse.TokenInfo> signIn(UsersRequest.SignIn signIn) {
+    public APIResponse<UserResponse.TokenInfo> signIn(UsersRequest.SignIn signIn) {
         User getUser = userRepository.findByEmail(signIn.getEmail()).orElseThrow(() -> new IllegalArgumentException("잘못된 이메일 정보"));
         if(!passwordEncoder.matches(signIn.getPassword(),getUser.getPassword())) throw new IllegalArgumentException("잘못된 비밀번호");
         CustomUserInfoDto userInfo = modelMapper.map(getUser, CustomUserInfoDto.class);
-        UsersResponse.TokenInfo  tokenInfo = jwtTokenProvider.generateToken(userInfo,getUser.getRole());
-
-
-        // 4. RefreshToken Redis 저장 (expirationTime 설정을 통해 자동 삭제 처리)
+        UserResponse.TokenInfo  tokenInfo = jwtTokenProvider.generateToken(userInfo,getUser.getRole());
+        // RefreshToken Redis 저장 (expirationTime 설정을 통해 자동 삭제 처리)
         redisTemplate.opsForValue()
                 .set("RT:" + getUser.getUserId(), tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
 
@@ -59,7 +57,7 @@ public class UsersService {
      * @param reissue
      * @return
      */
-    public APIResponse<UsersResponse.TokenInfo> reissue(UsersRequest.Reissue reissue) {
+    public APIResponse<UserResponse.TokenInfo> reissue(UsersRequest.Reissue reissue) {
         // 1. Refresh Token 검증
         if (!jwtTokenProvider.validateToken(reissue.getRefreshToken())) {
             throw new TokenException("Refresh Token 정보가 유효하지 않습니다.");
@@ -79,7 +77,7 @@ public class UsersService {
         }
 
         // 4. 새로운 토큰 생성
-        UsersResponse.TokenInfo tokenInfo = jwtTokenProvider.generateToken(authentication);
+        UserResponse.TokenInfo tokenInfo = jwtTokenProvider.generateToken(authentication);
 
         // 5. RefreshToken Redis 업데이트
         redisTemplate.opsForValue()
@@ -121,8 +119,8 @@ public class UsersService {
      * @param socialType
      * @return
      */
-    public APIResponse<UsersResponse.TokenInfo> getToken(String email, String uid, SocialType socialType){
-        UsersResponse.TokenInfo tokenInfo = null;
+    public APIResponse<UserResponse.TokenInfo> getToken(String email, String uid, SocialType socialType){
+        UserResponse.TokenInfo tokenInfo = null;
         Role role;
         if(userRepository.existsByUid(uid)){
             User getUser = userRepository.findByUid(uid).get();
@@ -130,12 +128,12 @@ public class UsersService {
             if(userRepository.existsByUidAndRole(uid,Role.ROLE_USER)){ //활동 가능한 유저
                 role = Role.ROLE_USER;
                 tokenInfo = jwtTokenProvider.generateToken(info,role);
-            } else if (userRepository.existsByUidAndRole(uid,Role.ROLE_UNPROFILE_USER) || userRepository.existsByUidAndRole(uid,Role.ROLE_UNPASSWORD_USER )) {
+            } else if (userRepository.existsByUidAndRole(uid,Role.ROLE_TEMPORARY_USER) ) {
                 role = userRepository.findByUid(uid).get().getRole();
                 tokenInfo = jwtTokenProvider.generateToken(info,role);
             }
         }else{ //이메일이 없으면 최초 가입 유저 == 프로필이 없는 상태
-            role = Role.ROLE_UNPROFILE_USER;
+            role = Role.ROLE_TEMPORARY_USER;
             User temporaryUser = User.builder().email(email).role(role).uid(uid).isDeleted(false).isBanned(false
             ).socialType(socialType).build();
 //            usersRepository.save(temporaryUser);
@@ -152,18 +150,18 @@ public class UsersService {
      * @param userId
      * @return
      */
-    public APIResponse<UsersResponse.UserRole> validateToken(Long userId) {
+    public APIResponse<UserResponse.UserRole> validateToken(Long userId) {
         User getUser = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("invalid userId"));
-        return APIResponse.of(SuccessCode.SELECT_SUCCESS, UsersResponse.UserRole.builder().role(getUser.getRole()).build());
+        return APIResponse.of(SuccessCode.SELECT_SUCCESS, UserResponse.UserRole.builder().role(getUser.getRole()).build());
     }
 
-    public UsersResponse.TokenInfo updateRoleAndToken(Role role, Long userId){
+    public UserResponse.TokenInfo updateRoleAndToken(Role role, Long userId){
         User getUser = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NullPointerException("invalid userId"));
         getUser.updateRole(role);
         userRepository.save(getUser);
 
         CustomUserInfoDto userInfo = modelMapper.map(getUser, CustomUserInfoDto.class);
-        UsersResponse.TokenInfo tokenInfo = jwtTokenProvider.generateToken(userInfo,getUser.getRole());
+        UserResponse.TokenInfo tokenInfo = jwtTokenProvider.generateToken(userInfo,getUser.getRole());
         redisTemplate.opsForValue()
                 .set("RT:" + getUser.getUserId(), tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
         return tokenInfo;

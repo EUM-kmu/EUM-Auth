@@ -19,7 +19,7 @@ public class ProfileResponseDTO {
     @Builder
     public static class ProfileResponseWithToken {
         private ProfileResponse profile;
-        private UsersResponse.TokenInfo tokenInfo;
+        private UserResponse.TokenInfo tokenInfo;
     }
 
 

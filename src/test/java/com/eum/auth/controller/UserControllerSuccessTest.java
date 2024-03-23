@@ -49,7 +49,6 @@ public class UserControllerSuccessTest {
                                 fieldWithPath("password").description("로그인 비밀번호")
                         ),
                         responseFields(
-
                                 fieldWithPath("status").description("토큰 타입 = bearer"),
                                 fieldWithPath("code").description("토큰 타입 = bearer"),
                                 fieldWithPath("msg").description("토큰 타입 = bearer"),
