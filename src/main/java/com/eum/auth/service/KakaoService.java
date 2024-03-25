@@ -91,13 +91,7 @@ public class KakaoService {
             //Gson 라이브러리로 JSON파싱
             JsonParser parser = new JsonParser();
             JsonElement element = parser.parse(result);
-
-            boolean hasEmail = element.getAsJsonObject().get("kakao_account").getAsJsonObject().get("has_email").getAsBoolean();
-            if(hasEmail){
-                uid = element.getAsJsonObject().get("id").getAsString();
-                email = element.getAsJsonObject().get("kakao_account").getAsJsonObject().get("email").getAsString();
-
-            }
+            uid = element.getAsJsonObject().get("id").getAsString();
             br.close();
             KakaoDTO.KaKaoInfo kaKaoInfo = KakaoDTO.KaKaoInfo.builder().uid(uid).email(email).build();
         return kaKaoInfo;

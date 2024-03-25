@@ -136,7 +136,7 @@ public class UsersService {
             role = Role.ROLE_TEMPORARY_USER;
             User temporaryUser = User.builder().email(email).role(role).uid(uid).isDeleted(false).isBanned(false
             ).socialType(socialType).build();
-//            usersRepository.save(temporaryUser);
+            userRepository.save(temporaryUser);
             CustomUserInfoDto info = modelMapper.map(temporaryUser, CustomUserInfoDto.class);
             tokenInfo = jwtTokenProvider.generateToken(info,role);
         }
