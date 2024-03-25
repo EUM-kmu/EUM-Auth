@@ -32,7 +32,7 @@ import java.io.IOException;
 @RequestMapping("auth-service/api/v2")
 @RestController
 @Tag(name = "Auth")
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
 public class AuthController {
     private final UsersService usersService;
     private final KakaoService kakaoService;
