@@ -1,4 +1,0 @@
-[source,json,options="nowrap"]
-----
-{"status":200,"code":"200","msg":"SELECT SUCCESS","detailMsg":"","data":{"grantType":"Bearer","accessToken":"eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMsInVpZCI6ImxvY2FsMyIsInJvbGUiOiJST0xFX1VOUEFTU1dPUkRfVVNFUiIsImlhdCI6MTcwOTcxNDQ5OCwiZXhwIjoxNzUyOTE0NDk4fQ.Do1tM8aELqQAsTt541UAtTkmhx8GkwpEm0r8E7i4BnU","refreshToken":"eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjIzMTQ1MTQ0OTh9.L2zeULuaoAH6EL_trd6bHDaxWW9d9E52BaVvOCQXTaM","refreshTokenExpirationTime":604800000,"role":"ROLE_UNPASSWORD_USER"}}
-----
