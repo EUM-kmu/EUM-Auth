@@ -1,5 +1,0 @@
-[source,bash]
-----
-$ echo '{"password":"1234","email":"test3@email"}' | http POST 'http://localhost:8080/auth-service/api/v2/auth/signin/local' \
-    'Content-Type:application/json;charset=UTF-8'
-----
