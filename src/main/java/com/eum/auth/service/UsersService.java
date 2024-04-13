@@ -33,6 +33,7 @@ public class UsersService {
     private JwtTokenProvider jwtTokenProvider;
     private final RedisTemplate redisTemplate;
     private final ModelMapper modelMapper;
+    private final ProfileService profileService;
 
 
     /**
@@ -45,6 +46,8 @@ public class UsersService {
         if(!passwordEncoder.matches(signIn.getPassword(),getUser.getPassword())) throw new IllegalArgumentException("잘못된 비밀번호");
         CustomUserInfoDto userInfo = modelMapper.map(getUser, CustomUserInfoDto.class);
         UserResponse.TokenInfo  tokenInfo = jwtTokenProvider.generateToken(userInfo,getUser.getRole());
+        tokenInfo.setUserId(getUser.getUserId());
+        tokenInfo.setProfileId(profileService.getProfileId(String.valueOf(getUser.getUserId())));
         // RefreshToken Redis 저장 (expirationTime 설정을 통해 자동 삭제 처리)
         redisTemplate.opsForValue()
                 .set("RT:" + getUser.getUserId(), tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
@@ -119,7 +122,7 @@ public class UsersService {
      * @param socialType
      * @return
      */
-    public APIResponse<UserResponse.TokenInfo> getToken(String email, String uid, SocialType socialType){
+    public UserResponse.TokenInfo getToken(String email, String uid, SocialType socialType){
         UserResponse.TokenInfo tokenInfo = null;
         Role role;
         if(userRepository.existsByUid(uid)){
@@ -128,9 +131,12 @@ public class UsersService {
             if(userRepository.existsByUidAndRole(uid,Role.ROLE_USER)){ //활동 가능한 유저
                 role = Role.ROLE_USER;
                 tokenInfo = jwtTokenProvider.generateToken(info,role);
+                tokenInfo.setUserId(getUser.getUserId());
+                tokenInfo.setProfileId(profileService.getProfileId(String.valueOf(getUser.getUserId())));
             } else if (userRepository.existsByUidAndRole(uid,Role.ROLE_TEMPORARY_USER) ) {
                 role = userRepository.findByUid(uid).get().getRole();
                 tokenInfo = jwtTokenProvider.generateToken(info,role);
+                tokenInfo.setUserId(getUser.getUserId());
             }
         }else{ //이메일이 없으면 최초 가입 유저 == 프로필이 없는 상태
             role = Role.ROLE_TEMPORARY_USER;
@@ -139,10 +145,11 @@ public class UsersService {
             userRepository.save(temporaryUser);
             CustomUserInfoDto info = modelMapper.map(temporaryUser, CustomUserInfoDto.class);
             tokenInfo = jwtTokenProvider.generateToken(info,role);
+            tokenInfo.setUserId(temporaryUser.getUserId());
         }
         redisTemplate.opsForValue()
                 .set("RT:" +email, tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
-        return APIResponse.of(SuccessCode.SELECT_SUCCESS, tokenInfo);
+        return tokenInfo;
     }
 
     /**

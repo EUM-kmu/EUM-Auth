@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.buf.UEncoder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -126,8 +127,10 @@ public class AuthController {
             uid = firebaseToken.getUid();
             socialType = SocialType.FIREBASE;
         }
+        UserResponse.TokenInfo tokenInfo = usersService.getToken(email, uid, socialType);
+        APIResponse response = APIResponse.of(SuccessCode.SELECT_SUCCESS, tokenInfo);
 //        log.info(token.);
-        return ResponseEntity.ok(usersService.getToken(email,uid,socialType));
+        return ResponseEntity.ok(response);
     }
 
     // 헤더에서 토큰 추출 위한 코드
