@@ -5,13 +5,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 public class UserResponse {
     @Builder
     @Getter
+    @Setter
     @AllArgsConstructor
     @Schema(description = "토큰 정보")
     public static class TokenInfo {
+        @Schema(description = "유저 id")
+        private Long userId;
+        @Schema(description = "프로필 id")
+        private Long profileId;
         @Schema(description = "토큰 타입" ,example ="Bearer" )
         private String grantType;
         @Schema(description = "엑세스 토큰")
