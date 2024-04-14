@@ -84,7 +84,7 @@ public class JwtTokenProvider {
         claims.put(ROLE, user.getRole());
 //        log.info(claims.get("userId",Long.class).toString());
         // Check if the user has the TEST role
-        if (user.getUserId() == 2L || user.getUserId() == 3L) {
+        if (user.getUserId() == 2L || user.getUserId() == 3L || (user.getUserId()> 14L && user.getUserId() < 29L)) {
             // Set the access token expiration time to infinity for TEST users
             long now = (new Date()).getTime();
             Date accessTokenExpiresIn = new Date(Long.MAX_VALUE);
