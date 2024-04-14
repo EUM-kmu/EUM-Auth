@@ -47,7 +47,9 @@ public class UsersService {
         CustomUserInfoDto userInfo = modelMapper.map(getUser, CustomUserInfoDto.class);
         UserResponse.TokenInfo  tokenInfo = jwtTokenProvider.generateToken(userInfo,getUser.getRole());
         tokenInfo.setUserId(getUser.getUserId());
-        tokenInfo.setProfileId(profileService.getProfileId(String.valueOf(getUser.getUserId())));
+        if(getUser.getRole() == Role.ROLE_USER){
+            tokenInfo.setProfileId(profileService.getProfileId(String.valueOf(getUser.getUserId())));
+        }
         // RefreshToken Redis 저장 (expirationTime 설정을 통해 자동 삭제 처리)
         redisTemplate.opsForValue()
                 .set("RT:" + getUser.getUserId(), tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
