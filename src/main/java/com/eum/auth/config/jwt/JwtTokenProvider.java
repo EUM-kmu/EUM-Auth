@@ -29,6 +29,8 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+import static com.eum.auth.domain.user.Role.ROLE_USER;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -56,43 +58,21 @@ public class JwtTokenProvider {
 
     public UserResponse.TokenInfo generateToken(Authentication authentication) {
         // 권한 가져오기
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-        User getUser = usersRepository.findById(Long.valueOf(authentication.getName())).orElseThrow(() -> new IllegalArgumentException("Invalid userId"));
+        User user = usersRepository.findById(Long.valueOf(authentication.getName())).orElseThrow(() -> new IllegalArgumentException("Invalid userId"));
 
+        Claims claims = Jwts.claims();
+        claims.put(USER_ID, user.getUserId());
+        claims.put(UID, user.getUid());
+        claims.put(ROLE, user.getRole());
 
-        long now = (new Date()).getTime();
-        // Access Token 생성
-        Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
-        String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim(AUTHORITIES_KEY, authorities)
-                .setExpiration(accessTokenExpiresIn)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-
-        // Refresh Token 생성
-        String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-        log.info(authentication.getAuthorities().toString());
-        UserResponse.TokenInfo tokenInfo = UserResponse.TokenInfo.builder()
-                .grantType(BEARER_TYPE)
-                .userId(Long.valueOf(authentication.getName()))
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .refreshTokenExpirationTime(REFRESH_TOKEN_EXPIRE_TIME)
-                .role(Role.valueOf(authorities))
-                .build();
-        if(getUser.getRole() == Role.ROLE_USER){
-            ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(getUser.getUserId()));
+        UserResponse.TokenInfo tokenInfo = generateToken(user.getUserId(),user.getRole(), claims);
+        if(user.getRole() == ROLE_USER) {
+            ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(tokenInfo.getUserId()));
             tokenInfo.setNickName(profileResponse.getNickName());
         }
         return tokenInfo;
     }
-    public UserResponse.TokenInfo generateToken(CustomUserInfoDto user, Role role) {
+    public UserResponse.TokenInfo generateToken(CustomUserInfoDto user,Role role) {
         Claims claims = Jwts.claims();
         claims.put(USER_ID, user.getUserId());
         claims.put(UID, user.getUid());
@@ -101,6 +81,7 @@ public class JwtTokenProvider {
         // Check if the user has the TEST role
         if (user.getUserId() == 2L || user.getUserId() == 3L || (user.getUserId()> 14L && user.getUserId() < 29L)) {
             // Set the access token expiration time to infinity for TEST users
+            log.info(user.getRole().toString());
             long now = (new Date()).getTime();
             Date accessTokenExpiresIn = new Date(Long.MAX_VALUE);
 
@@ -126,32 +107,13 @@ public class JwtTokenProvider {
                     .build();
         } else {
             // Generate the access and refresh tokens normally for non-TEST users
-            ZonedDateTime now = ZonedDateTime.now();
-            ZonedDateTime accessTokenExpiresIn = now.plusSeconds( ACCESS_TOKEN_EXPIRE_TIME);
-            ZonedDateTime refreshTokenExpiresIn = now.plusSeconds( REFRESH_TOKEN_EXPIRE_TIME);
-
-            // Generate the access token
-            String accessToken = Jwts.builder()
-                    .setClaims(claims)
-                    .setIssuedAt(Date.from(now.toInstant()))
-                    .setExpiration(Date.from(accessTokenExpiresIn.toInstant()))
-                    .signWith(key, SignatureAlgorithm.HS256)
-                    .compact();
-
-            // Generate the refresh token
-            String refreshToken = Jwts.builder()
-                    .setExpiration(Date.from(refreshTokenExpiresIn.toInstant()))
-                    .signWith(key, SignatureAlgorithm.HS256)
-                    .compact();
-
-            return UserResponse.TokenInfo.builder()
-                    .grantType(BEARER_TYPE)
-                    .accessToken(accessToken)
-                    .refreshToken(refreshToken)
-                    .refreshTokenExpirationTime(REFRESH_TOKEN_EXPIRE_TIME)
-                    .role(role)
-                    .build();}
-//        }
+            UserResponse.TokenInfo tokenInfo = generateToken(user.getUserId(),role, claims);
+            if(user.getRole() == ROLE_USER) {
+                ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(tokenInfo.getUserId()));
+                tokenInfo.setNickName(profileResponse.getNickName());
+            }
+            return tokenInfo;
+        }
     }
 
     // JWT 토큰을 복호화하여 토큰에 들어있는 정보를 꺼내는 메서드
@@ -206,6 +168,26 @@ public class JwtTokenProvider {
         // 현재 시간
         Long now = new Date().getTime();
         return (expiration.getTime() - now);
+    }
+    private UserResponse.TokenInfo generateToken(Long userId, Role role,Claims claims){
+        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime accessTokenExpiresIn = now.plusSeconds( ACCESS_TOKEN_EXPIRE_TIME);
+        ZonedDateTime refreshTokenExpiresIn = now.plusSeconds( REFRESH_TOKEN_EXPIRE_TIME);
+
+        String accessToken = Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(Date.from(now.toInstant()))
+                .setExpiration(Date.from(accessTokenExpiresIn.toInstant()))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        // Generate the refresh token
+        String refreshToken = Jwts.builder()
+                .setExpiration(Date.from(refreshTokenExpiresIn.toInstant()))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+        return UserResponse.toTokenInfo(BEARER_TYPE, userId, accessToken, refreshToken, REFRESH_TOKEN_EXPIRE_TIME, role);
+
     }
 
 }

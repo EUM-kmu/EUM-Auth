@@ -27,6 +27,7 @@ public class UserResponse {
         @Schema(description = "토큰 만료 시간")
         private Long refreshTokenExpirationTime;
         private Role role;
+
     }
     @Builder
     @Getter
@@ -34,6 +35,17 @@ public class UserResponse {
     public static class UserRole {
         private Role role;
 
+    }
+    public static TokenInfo toTokenInfo(String BEARER_TYPE, Long userId, String accessToken, String refreshToken, Long REFRESH_TOKEN_EXPIRE_TIME, Role role){
+
+        return TokenInfo.builder()
+                .grantType(BEARER_TYPE)
+                .userId(userId)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .refreshTokenExpirationTime(REFRESH_TOKEN_EXPIRE_TIME)
+                .role(role)
+                .build();
     }
 
 

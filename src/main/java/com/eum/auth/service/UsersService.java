@@ -135,13 +135,11 @@ public class UsersService {
             if(userRepository.existsByUidAndRole(uid,Role.ROLE_USER)){ //활동 가능한 유저
                 role = Role.ROLE_USER;
                 tokenInfo = jwtTokenProvider.generateToken(info,role);
-                tokenInfo.setUserId(getUser.getUserId());
                 ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(getUser.getUserId()));
                 tokenInfo.setNickName(profileResponse.getNickName());
             } else if (userRepository.existsByUidAndRole(uid,Role.ROLE_TEMPORARY_USER) ) {
                 role = userRepository.findByUid(uid).get().getRole();
                 tokenInfo = jwtTokenProvider.generateToken(info,role);
-                tokenInfo.setUserId(getUser.getUserId());
             }
         }else{ //이메일이 없으면 최초 가입 유저 == 프로필이 없는 상태
             role = Role.ROLE_TEMPORARY_USER;
