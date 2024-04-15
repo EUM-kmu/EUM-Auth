@@ -4,6 +4,7 @@ import com.eum.auth.common.DTO.APIResponse;
 import com.eum.auth.common.DTO.enums.SuccessCode;
 import com.eum.auth.config.jwt.JwtTokenProvider;
 import com.eum.auth.controller.DTO.request.UsersRequest;
+import com.eum.auth.controller.DTO.response.ProfileResponseDTO;
 import com.eum.auth.controller.DTO.response.UserResponse;
 import com.eum.auth.domain.CustomUserInfoDto;
 import com.eum.auth.domain.user.Role;
@@ -48,7 +49,9 @@ public class UsersService {
         UserResponse.TokenInfo  tokenInfo = jwtTokenProvider.generateToken(userInfo,getUser.getRole());
         tokenInfo.setUserId(getUser.getUserId());
         if(getUser.getRole() == Role.ROLE_USER){
-            tokenInfo.setProfileId(profileService.getProfileId(String.valueOf(getUser.getUserId())));
+            ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(getUser.getUserId()));
+            tokenInfo.setProfileId(profileResponse.getProfileId());
+            tokenInfo.setNickName(profileResponse.getNickName());
         }
         // RefreshToken Redis 저장 (expirationTime 설정을 통해 자동 삭제 처리)
         redisTemplate.opsForValue()
@@ -134,7 +137,9 @@ public class UsersService {
                 role = Role.ROLE_USER;
                 tokenInfo = jwtTokenProvider.generateToken(info,role);
                 tokenInfo.setUserId(getUser.getUserId());
-                tokenInfo.setProfileId(profileService.getProfileId(String.valueOf(getUser.getUserId())));
+                ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(getUser.getUserId()));
+                tokenInfo.setProfileId(profileResponse.getProfileId());
+                tokenInfo.setNickName(profileResponse.getNickName());
             } else if (userRepository.existsByUidAndRole(uid,Role.ROLE_TEMPORARY_USER) ) {
                 role = userRepository.findByUid(uid).get().getRole();
                 tokenInfo = jwtTokenProvider.generateToken(info,role);

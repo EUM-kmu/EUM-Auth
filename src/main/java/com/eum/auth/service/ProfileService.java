@@ -19,8 +19,8 @@ public class ProfileService {
 
         return profileResponse;
     }
-    public Long getProfileId(String userId){
+    public ProfileResponseDTO.ProfileResponse getProfile(String userId){
         ResponseEntity<APIResponse<ProfileResponseDTO.ProfileResponse>> response = haetsalClient.getMyProfile(userId);
-        return response.getBody().getData().getProfileId();
+        return response.getBody().getData();
     }
 }
