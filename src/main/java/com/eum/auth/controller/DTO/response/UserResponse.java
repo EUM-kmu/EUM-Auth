@@ -18,6 +18,8 @@ public class UserResponse {
         private Long userId;
         @Schema(description = "프로필 id")
         private Long profileId;
+        @Schema(description = "닉네임")
+        private String nickName;
         @Schema(description = "토큰 타입" ,example ="Bearer" )
         private String grantType;
         @Schema(description = "엑세스 토큰")
