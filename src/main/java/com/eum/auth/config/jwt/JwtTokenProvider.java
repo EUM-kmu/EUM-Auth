@@ -1,11 +1,15 @@
 package com.eum.auth.config.jwt;
 
+import com.eum.auth.controller.DTO.response.ProfileResponseDTO;
 import com.eum.auth.controller.DTO.response.UserResponse;
 import com.eum.auth.domain.CustomUserInfoDto;
 import com.eum.auth.domain.user.Role;
+import com.eum.auth.domain.user.User;
 import com.eum.auth.domain.user.UserRepository;
 import com.eum.auth.exception.TokenException;
 import com.eum.auth.service.CustomUserDetailsService;
+import com.eum.auth.service.ProfileService;
+import com.eum.auth.service.UsersService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -42,6 +46,8 @@ public class JwtTokenProvider {
     private final Key key;
     @Autowired
     private UserRepository usersRepository;
+    @Autowired
+    private  ProfileService profileService;
 
     public JwtTokenProvider(){
         byte[] keyBytes = Decoders.BASE64.decode("VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHN");
@@ -53,6 +59,8 @@ public class JwtTokenProvider {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
+        User getUser = usersRepository.findById(Long.valueOf(authentication.getName())).orElseThrow(() -> new IllegalArgumentException("Invalid userId"));
+
 
         long now = (new Date()).getTime();
         // Access Token 생성
@@ -69,13 +77,20 @@ public class JwtTokenProvider {
                 .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
-
-        return UserResponse.TokenInfo.builder()
+        log.info(authentication.getAuthorities().toString());
+        UserResponse.TokenInfo tokenInfo = UserResponse.TokenInfo.builder()
                 .grantType(BEARER_TYPE)
+                .userId(Long.valueOf(authentication.getName()))
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .refreshTokenExpirationTime(REFRESH_TOKEN_EXPIRE_TIME)
+                .role(Role.valueOf(authorities))
                 .build();
+        if(getUser.getRole() == Role.ROLE_USER){
+            ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(getUser.getUserId()));
+            tokenInfo.setNickName(profileResponse.getNickName());
+        }
+        return tokenInfo;
     }
     public UserResponse.TokenInfo generateToken(CustomUserInfoDto user, Role role) {
         Claims claims = Jwts.claims();

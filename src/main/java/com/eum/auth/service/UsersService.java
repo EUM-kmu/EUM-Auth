@@ -50,7 +50,6 @@ public class UsersService {
         tokenInfo.setUserId(getUser.getUserId());
         if(getUser.getRole() == Role.ROLE_USER){
             ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(getUser.getUserId()));
-            tokenInfo.setProfileId(profileResponse.getProfileId());
             tokenInfo.setNickName(profileResponse.getNickName());
         }
         // RefreshToken Redis 저장 (expirationTime 설정을 통해 자동 삭제 처리)
@@ -138,7 +137,6 @@ public class UsersService {
                 tokenInfo = jwtTokenProvider.generateToken(info,role);
                 tokenInfo.setUserId(getUser.getUserId());
                 ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(getUser.getUserId()));
-                tokenInfo.setProfileId(profileResponse.getProfileId());
                 tokenInfo.setNickName(profileResponse.getNickName());
             } else if (userRepository.existsByUidAndRole(uid,Role.ROLE_TEMPORARY_USER) ) {
                 role = userRepository.findByUid(uid).get().getRole();

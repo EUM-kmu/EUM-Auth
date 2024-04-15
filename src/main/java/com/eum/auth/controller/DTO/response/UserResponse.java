@@ -16,8 +16,6 @@ public class UserResponse {
     public static class TokenInfo {
         @Schema(description = "유저 id")
         private Long userId;
-        @Schema(description = "프로필 id")
-        private Long profileId;
         @Schema(description = "닉네임")
         private String nickName;
         @Schema(description = "토큰 타입" ,example ="Bearer" )
