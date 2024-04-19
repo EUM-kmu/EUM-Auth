@@ -86,6 +86,7 @@ public class UsersService {
         // 4. 새로운 토큰 생성
         UserResponse.TokenInfo tokenInfo = jwtTokenProvider.generateToken(authentication);
 
+
         // 5. RefreshToken Redis 업데이트
         redisTemplate.opsForValue()
                 .set("RT:" + authentication.getName(), tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);

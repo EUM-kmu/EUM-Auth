@@ -66,7 +66,7 @@ public class JwtTokenProvider {
         claims.put(ROLE, user.getRole());
 
         UserResponse.TokenInfo tokenInfo = generateToken(user.getUserId(),user.getRole(), claims);
-        if(user.getRole() == ROLE_USER) {
+        if(user.getRole().equals(ROLE_USER)) {
             ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(tokenInfo.getUserId()));
             tokenInfo.setNickName(profileResponse.getNickName());
         }
@@ -108,10 +108,10 @@ public class JwtTokenProvider {
         } else {
             // Generate the access and refresh tokens normally for non-TEST users
             UserResponse.TokenInfo tokenInfo = generateToken(user.getUserId(),role, claims);
-            if(user.getRole() == ROLE_USER) {
-                ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(tokenInfo.getUserId()));
-                tokenInfo.setNickName(profileResponse.getNickName());
-            }
+//            if(user.getRole().equals(ROLE_USER)) {
+//                ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(tokenInfo.getUserId()));
+//                tokenInfo.setNickName(profileResponse.getNickName());
+//            }
             return tokenInfo;
         }
     }
