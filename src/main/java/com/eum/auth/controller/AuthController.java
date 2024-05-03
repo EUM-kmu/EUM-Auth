@@ -8,9 +8,9 @@ import com.eum.auth.controller.DTO.response.UserResponse;
 import com.eum.auth.domain.CustomUserDetails;
 import com.eum.auth.domain.user.Role;
 import com.eum.auth.domain.user.SocialType;
+import com.eum.auth.service.AuthService;
 import com.eum.auth.service.DTO.KakaoDTO;
 import com.eum.auth.service.KakaoService;
-import com.eum.auth.service.UsersService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.buf.UEncoder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +34,7 @@ import java.io.IOException;
 @Tag(name = "Auth")
 @CrossOrigin(origins = {"http://localhost:3000","https://hanmaeul.vercel.app"}, allowedHeaders = "*")
 public class AuthController {
-    private final UsersService usersService;
+    private final AuthService authService;
     private final KakaoService kakaoService;
     @Hidden
     @GetMapping()
@@ -43,26 +42,10 @@ public class AuthController {
         return "ok";
     }
 
-
-    /**
-     *
-     * @param customUserDetails : jwt 토큰에 담겨있는 customUserDetails
-     * @return :
-     * 기능 :
-     *  프로필 작성 중단하고 서비스를 재사용할때 상태 판별을 위한 토큰 조회 controller
-     *  ROLE_UNPROFILE_USER : 새유저, 소셜로그인만 한 상태
-     *  ROLE_UNPASSWORD_USER : 프로필만 만들고 계좌 생성이 안된 상태
-     *  ROLE_USER : 최종 활동이 가능한 상태
-     */
-    @Hidden
-    @GetMapping("/token")
-    public ResponseEntity<APIResponse<UserResponse.UserRole>> validateToken(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        return new ResponseEntity<>(usersService.validateToken(Long.valueOf(customUserDetails.getUsername())), HttpStatus.OK);
-    }
     @Hidden
     @PutMapping("/token")
     public UserResponse.TokenInfo updateToken(@RequestHeader("userId") String userId) {
-        UserResponse.TokenInfo tokenInfo = usersService.updateRoleAndToken(Role.ROLE_USER, Long.valueOf(userId));
+        UserResponse.TokenInfo tokenInfo = authService.updateRoleAndToken(Role.ROLE_USER, Long.valueOf(userId));
 //        APIResponse response = APIResponse.of(SuccessCode.UPDATE_SUCCESS, tokenInfo);
         return tokenInfo;
     }
@@ -76,12 +59,12 @@ public class AuthController {
 
     @PostMapping("/auth/signin/local")
     public ResponseEntity<APIResponse<UserResponse.TokenInfo>> signIn(@RequestBody @Validated UsersRequest.SignIn signIn){
-        return ResponseEntity.ok(usersService.signIn(signIn));
+        return ResponseEntity.ok(authService.signIn(signIn));
     }
 
     @PostMapping("/auth/reissue")
     public ResponseEntity<APIResponse<UserResponse.TokenInfo>> reissue(@RequestBody @Validated UsersRequest.Reissue reissue){
-        return ResponseEntity.ok(usersService.reissue(reissue));
+        return ResponseEntity.ok(authService.reissue(reissue));
     }
 
     /**
@@ -96,7 +79,7 @@ public class AuthController {
 
         // Extract Bearer token from Authorization header
         String bearerToken = extractBearerToken(authorizationHeader);
-        usersService.logout(bearerToken);
+        authService.logout(bearerToken);
 
         // Pass the Bearer token to the logout method
         return ResponseEntity.ok( APIResponse.of(SuccessCode.UPDATE_SUCCESS,"로그아웃 되었습니다."));
@@ -124,7 +107,7 @@ public class AuthController {
             uid = firebaseToken.getUid();
             socialType = SocialType.FIREBASE;
         }
-        UserResponse.TokenInfo tokenInfo = usersService.getToken( uid, socialType);
+        UserResponse.TokenInfo tokenInfo = authService.getToken( uid, socialType);
         APIResponse response = APIResponse.of(SuccessCode.SELECT_SUCCESS, tokenInfo);
 //        log.info(token.);
         return ResponseEntity.ok(response);
