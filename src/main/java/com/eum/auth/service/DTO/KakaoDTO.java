@@ -12,7 +12,6 @@ public class KakaoDTO {
     @Builder
     public static class KaKaoInfo{
         private String uid;
-        private String email;
 
     }
 }

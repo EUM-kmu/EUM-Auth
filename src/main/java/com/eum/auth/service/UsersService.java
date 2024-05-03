@@ -43,7 +43,7 @@ public class UsersService {
      * @return
      */
     public APIResponse<UserResponse.TokenInfo> signIn(UsersRequest.SignIn signIn) {
-        User getUser = userRepository.findByEmail(signIn.getEmail()).orElseThrow(() -> new IllegalArgumentException("잘못된 이메일 정보"));
+        User getUser = userRepository.findByEmail(signIn.getTestmail()).orElseThrow(() -> new IllegalArgumentException("잘못된 이메일 정보"));
         if(!passwordEncoder.matches(signIn.getPassword(),getUser.getPassword())) throw new IllegalArgumentException("잘못된 비밀번호");
         CustomUserInfoDto userInfo = modelMapper.map(getUser, CustomUserInfoDto.class);
         UserResponse.TokenInfo  tokenInfo = jwtTokenProvider.generateToken(userInfo,getUser.getRole());
@@ -122,17 +122,18 @@ public class UsersService {
 
     /**
      * 자체 jwt 토큰 발급
-     * @param email
      * @param uid
      * @param socialType
      * @return
      */
-    public UserResponse.TokenInfo getToken(String email, String uid, SocialType socialType){
+    public UserResponse.TokenInfo getToken(String uid, SocialType socialType){
         UserResponse.TokenInfo tokenInfo = null;
         Role role;
+        Long userId;
         if(userRepository.existsByUid(uid)){
             User getUser = userRepository.findByUid(uid).get();
             CustomUserInfoDto info = modelMapper.map(getUser, CustomUserInfoDto.class);
+            userId = getUser.getUserId();
             if(userRepository.existsByUidAndRole(uid,Role.ROLE_USER)){ //활동 가능한 유저
                 role = Role.ROLE_USER;
                 tokenInfo = jwtTokenProvider.generateToken(info,role);
@@ -144,15 +145,16 @@ public class UsersService {
             }
         }else{ //이메일이 없으면 최초 가입 유저 == 프로필이 없는 상태
             role = Role.ROLE_TEMPORARY_USER;
-            User temporaryUser = User.builder().email(email).role(role).uid(uid).isDeleted(false).isBanned(false
+            User temporaryUser = User.builder().email("").role(role).uid(uid).isDeleted(false).isBanned(false
             ).socialType(socialType).build();
             userRepository.save(temporaryUser);
+            userId = temporaryUser.getUserId();
             CustomUserInfoDto info = modelMapper.map(temporaryUser, CustomUserInfoDto.class);
             tokenInfo = jwtTokenProvider.generateToken(info,role);
             tokenInfo.setUserId(temporaryUser.getUserId());
         }
         redisTemplate.opsForValue()
-                .set("RT:" +email, tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
+                .set("RT:" +userId, tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
         return tokenInfo;
     }
 
