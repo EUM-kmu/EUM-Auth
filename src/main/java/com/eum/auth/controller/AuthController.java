@@ -113,21 +113,18 @@ public class AuthController {
 
     @PostMapping("/auth/signin/{type}")
     public ResponseEntity<APIResponse<UserResponse.TokenInfo>> getToken(@PathVariable SignInType type , @RequestBody @Validated UsersRequest.Token token) throws IOException, FirebaseAuthException {
-        String email = "";
         String uid = "";
         SocialType socialType = null;
         if(type == SignInType.kakao){
             KakaoDTO.KaKaoInfo kaKaoInfo= kakaoService.createKakaoUser(token.getToken());
-            email = kaKaoInfo.getEmail();
             uid = kaKaoInfo.getUid();
             socialType = SocialType.KAKAO;
         } else if (type == SignInType.firebase) {
             FirebaseToken firebaseToken = FirebaseAuth.getInstance().verifyIdToken(token.getToken());
-            email = firebaseToken.getEmail();
             uid = firebaseToken.getUid();
             socialType = SocialType.FIREBASE;
         }
-        UserResponse.TokenInfo tokenInfo = usersService.getToken(email, uid, socialType);
+        UserResponse.TokenInfo tokenInfo = usersService.getToken( uid, socialType);
         APIResponse response = APIResponse.of(SuccessCode.SELECT_SUCCESS, tokenInfo);
 //        log.info(token.);
         return ResponseEntity.ok(response);

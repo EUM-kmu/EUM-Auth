@@ -93,7 +93,7 @@ public class KakaoService {
             JsonElement element = parser.parse(result);
             uid = element.getAsJsonObject().get("id").getAsString();
             br.close();
-            KakaoDTO.KaKaoInfo kaKaoInfo = KakaoDTO.KaKaoInfo.builder().uid(uid).email(email).build();
+            KakaoDTO.KaKaoInfo kaKaoInfo = KakaoDTO.KaKaoInfo.builder().uid(uid).build();
         return kaKaoInfo;
 
         } catch (IOException e) {
