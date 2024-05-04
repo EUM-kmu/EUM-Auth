@@ -88,6 +88,7 @@ public class AuthService {
         // 5. RefreshToken Redis 업데이트
         redisTemplate.opsForValue()
                 .set("RT:" + authentication.getName(), tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
+        tokenInfo.setRejoinUser(getUser.getPreviousUserId() != -1);
 
         return APIResponse.of(SuccessCode.UPDATE_SUCCESS,tokenInfo);
     }
