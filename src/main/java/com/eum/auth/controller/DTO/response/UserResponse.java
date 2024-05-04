@@ -27,7 +27,6 @@ public class UserResponse {
         @Schema(description = "토큰 만료 시간")
         private Long refreshTokenExpirationTime;
         private Role role;
-        private Long previousUserId;
 
     }
     @Builder
