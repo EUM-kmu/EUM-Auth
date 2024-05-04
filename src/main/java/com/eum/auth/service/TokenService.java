@@ -25,13 +25,11 @@ public class TokenService {
         CustomUserInfoDto info = modelMapper.map(temporaryUser, CustomUserInfoDto.class);
         UserResponse.TokenInfo tokenInfo = jwtTokenProvider.generateToken(info,Role.ROLE_TEMPORARY_USER);
         tokenInfo.setUserId(temporaryUser.getUserId());
-        tokenInfo.setPreviousUserId(temporaryUser.getPreviousUserId());
         return tokenInfo;
     }
     public UserResponse.TokenInfo temporaryToken(User user){
         CustomUserInfoDto info = modelMapper.map(user, CustomUserInfoDto.class);
         UserResponse.TokenInfo tokenInfo = jwtTokenProvider.generateToken(info, Role.ROLE_TEMPORARY_USER);
-        tokenInfo.setPreviousUserId(user.getPreviousUserId());
         return tokenInfo;
     }
     public UserResponse.TokenInfo userToken(User user){
@@ -39,7 +37,6 @@ public class TokenService {
         UserResponse.TokenInfo tokenInfo = jwtTokenProvider.generateToken(info,Role.ROLE_USER);
         ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(user.getUserId()));
         tokenInfo.setNickName(profileResponse.getNickName());
-        tokenInfo.setPreviousUserId(user.getPreviousUserId());
         return tokenInfo;
     }
     public UserResponse.TokenInfo rejoinToken(User deletedUser){
@@ -47,7 +44,6 @@ public class TokenService {
         CustomUserInfoDto info = modelMapper.map(newUser, CustomUserInfoDto.class);
         UserResponse.TokenInfo tokenInfo = jwtTokenProvider.generateToken(info, Role.ROLE_TEMPORARY_USER);
         tokenInfo.setUserId(newUser.getUserId());
-        tokenInfo.setPreviousUserId(deletedUser.getPreviousUserId());
         return tokenInfo;
     }
 }

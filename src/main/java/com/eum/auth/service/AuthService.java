@@ -85,7 +85,6 @@ public class AuthService {
         // 4. 새로운 토큰 생성
         UserResponse.TokenInfo tokenInfo = jwtTokenProvider.generateToken(authentication);
         User getUser = userRepository.findById(Long.valueOf(authentication.getName())).orElseThrow(() -> new IllegalArgumentException("잘못된 토큰"));
-        tokenInfo.setPreviousUserId(getUser.getPreviousUserId());
         // 5. RefreshToken Redis 업데이트
         redisTemplate.opsForValue()
                 .set("RT:" + authentication.getName(), tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);

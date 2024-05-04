@@ -15,5 +15,6 @@ public class CustomUserInfoDto {
     boolean isBanned;
     Role role;
     boolean isDeleted;
+    Long previousUserId;
 
 }

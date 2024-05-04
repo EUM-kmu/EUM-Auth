@@ -41,6 +41,7 @@ public class JwtTokenProvider {
     private static final String UID = "uid";
     private static final String ROLE = "role";
     private static final String BEARER_TYPE = "Bearer";
+    private static final String PREVIOUS_USERID = "previousUserId";
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 12 * 60 * 60 * 1000L;
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;    // 7일
     @Autowired
@@ -64,6 +65,7 @@ public class JwtTokenProvider {
         claims.put(USER_ID, user.getUserId());
         claims.put(UID, user.getUid());
         claims.put(ROLE, user.getRole());
+        claims.put(PREVIOUS_USERID, user.getPreviousUserId());
 
         UserResponse.TokenInfo tokenInfo = generateToken(user.getUserId(),user.getRole(), claims);
         if(user.getRole().equals(ROLE_USER)) {
@@ -73,10 +75,12 @@ public class JwtTokenProvider {
         return tokenInfo;
     }
     public UserResponse.TokenInfo generateToken(CustomUserInfoDto user,Role role) {
+        log.info(String.valueOf(user.getPreviousUserId()));
         Claims claims = Jwts.claims();
         claims.put(USER_ID, user.getUserId());
         claims.put(UID, user.getUid());
         claims.put(ROLE, user.getRole());
+        claims.put(PREVIOUS_USERID, user.getPreviousUserId());
 //        log.info(claims.get("userId",Long.class).toString());
         // Check if the user has the TEST role
         if (user.getUserId() == 2L || user.getUserId() == 3L || (user.getUserId()> 14L && user.getUserId() < 29L)) {
