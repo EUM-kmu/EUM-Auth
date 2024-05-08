@@ -31,26 +31,6 @@ ext {
     set('springCloudVersion', "2023.0.0")
     snippetsDir = file('build/generated-snippets')
 }
-asciidoctor {
-    dependsOn test
-    attributes 'snippets': snippetsDir
-    inputs.dir snippetsDir
-    outputDir file('build/docs/html') // Output directory for HTML files
-}
-
-asciidoctor.doFirst { // add
-    println("---------------- delete present asciidoctor.")
-    delete file('src/main/resources/static/docs')
-}
-
-bootJar { // ad
-    dependsOn asciidoctor
-    copy {
-        from("${asciidoctor.outputDir}")
-        into 'src/main/resources/static/docs'
-    }
-}
-
 test { // 필수
     outputs.dir snippetsDir
     useJUnitPlatform()
