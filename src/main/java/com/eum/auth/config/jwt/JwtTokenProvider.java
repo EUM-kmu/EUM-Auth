@@ -9,7 +9,6 @@ import com.eum.auth.domain.user.UserRepository;
 import com.eum.auth.exception.TokenException;
 import com.eum.auth.service.CustomUserDetailsService;
 import com.eum.auth.service.ProfileService;
-import com.eum.auth.service.UsersService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -20,14 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 import static com.eum.auth.domain.user.Role.ROLE_USER;
 
@@ -67,7 +64,7 @@ public class JwtTokenProvider {
         claims.put(UID, user.getUid());
         claims.put(ROLE, user.getRole());
         claims.put(PREVIOUS_USERID, user.getPreviousUserId());
-        claims.put(DELETED, user.isDeleted());
+//        claims.put(DELETED, user.isDeleted());
 
         UserResponse.TokenInfo tokenInfo = generateToken(user.getUserId(),user.getRole(), claims);
         if(user.getRole().equals(ROLE_USER)) {
@@ -83,7 +80,7 @@ public class JwtTokenProvider {
         claims.put(UID, user.getUid());
         claims.put(ROLE, user.getRole());
         claims.put(PREVIOUS_USERID, user.getPreviousUserId());
-        claims.put(DELETED, user.isDeleted());
+//        claims.put(DELETED, user.());
 //        log.info(claims.get("userId",Long.class).toString());
         // Check if the user has the TEST role
         if (user.getUserId() == 2L || user.getUserId() == 3L || (user.getUserId()> 14L && user.getUserId() < 29L)) {

@@ -20,11 +20,11 @@ public class User extends BaseTimeEntity {
     private String email;
     private String password;
     private Boolean isBanned;
-    private boolean isDeleted;
+    private boolean deleted;
     private Long previousUserId;
 
     public void setDeleted() {
-        isDeleted = true;
+        deleted = true;
     }
 
     public void updateRole(Role role) {
@@ -44,7 +44,7 @@ public class User extends BaseTimeEntity {
                 .role(Role.ROLE_TEMPORARY_USER)
                 .previousUserId(-1L)
                 .uid(uid)
-                .isDeleted(false)
+                .deleted(false)
                 .isBanned(false)
                 .socialType(socialType).build();
     }
