@@ -27,10 +27,10 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - uses: actions/checkout@v3
-    - run: touch ./src/main/resources/application.yml
-    - run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
-    - run: cat ./src/main/resources/application.yml
+    - name: Set YML
+      run: |
+        echo "${{ secrets.APPLICATION }}" > src/main/resources/application.yml
+        find src
 
     # Configure Gradle for optimal use in GiHub Actions, including caching of downloaded dependencies.
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
