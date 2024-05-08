@@ -18,6 +18,10 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+    - uses: actions/checkout@v3
+    - run: touch ./src/main/resources/application.yml
+    - run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
+    - run: cat ./src/main/resources/application.yml
     # 2. spring boot 애플리케이션 빌드
     - name: build with Gradle
       uses: gradle/gradle-build-action@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
