@@ -27,6 +27,10 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+    - uses: actions/checkout@v3
+    - run: touch ./src/main/resources/application.yml
+    - run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
+    - run: cat ./src/main/resources/application.yml
 
     # Configure Gradle for optimal use in GiHub Actions, including caching of downloaded dependencies.
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
@@ -35,3 +39,41 @@ jobs:
 
     - name: Build with Gradle Wrapper
       run: ./gradlew build -x test
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: cicdsample
+        path: build/libs/*.jar
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: cicdsample
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.REMOTE_SSH_KEY }}
+      - name: Add remote server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan ${{ secrets.REMOTE_IP }} >> ~/.ssh/known_hosts
+      - name: SCP transfer
+        run: scp *.jar ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:~/cicd
+      - name: Execute remote commands
+        run: |
+          ssh -v ${{ secrets.REMOTE_SSH_ID }}@${{ secrets.REMOTE_IP }} "sudo fuser -k 8080/tcp || true"
+          ssh -v ${{ secrets.REMOTE_SSH_ID }}@${{ secrets.REMOTE_IP }} "nohup /home/shane/.sdkman/candidates/java/current/bin/java -jar ~/cicd/*.jar  > ~/cicd/nohup.log 2>&1 &"
+    # - name: Deploy
+    #   uses: appleboy/ssh-action@master
+    #   with:
+    #       host: ${{ secrets.REMOTE_IP }}
+    #       username: ${{ secrets.REMOTE_SSH_ID }}
+    #       key: ${{ secrets.REMOTE_SSH_KEY }}
+    #       port: ${{ secrets.REMOTE_SSH_PORT }}
+    #       script: |
+    #         whoami
+    #         git pull origin main
