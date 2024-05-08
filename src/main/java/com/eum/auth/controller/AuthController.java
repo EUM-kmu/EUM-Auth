@@ -8,9 +8,11 @@ import com.eum.auth.controller.DTO.response.UserResponse;
 import com.eum.auth.domain.CustomUserDetails;
 import com.eum.auth.domain.user.Role;
 import com.eum.auth.domain.user.SocialType;
+import com.eum.auth.domain.user.User;
 import com.eum.auth.service.AuthService;
 import com.eum.auth.service.DTO.KakaoDTO;
 import com.eum.auth.service.KakaoService;
+import com.eum.auth.service.UsersService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
@@ -36,6 +38,7 @@ import java.io.IOException;
 public class AuthController {
     private final AuthService authService;
     private final KakaoService kakaoService;
+    private final UsersService usersService;
     @Hidden
     @GetMapping()
     public String get(){
@@ -73,10 +76,14 @@ public class AuthController {
      * @return
      * 기능 : redis에서 토큰 정보 삭제
      */
-
     @PostMapping("/logOut")
-    public ResponseEntity<?> logout(@RequestHeader(name = HttpHeaders.AUTHORIZATION) String authorizationHeader) {
-
+    public ResponseEntity<?> logout(@RequestHeader(name = HttpHeaders.AUTHORIZATION) String authorizationHeader, @RequestHeader("userId") String userId) throws FirebaseAuthException {
+        User getUser = usersService.findById(Long.valueOf(userId));
+        if(getUser.getSocialType() == SocialType.KAKAO){
+            kakaoService.logout(getUser.getUid()); //카카오와 연결 끊기
+        } else if (getUser.getSocialType() == SocialType.FIREBASE) {
+            FirebaseAuth.getInstance().deleteUser(getUser.getUid()); //파이어베이스에 저장된 유저정보 제거
+        }
         // Extract Bearer token from Authorization header
         String bearerToken = extractBearerToken(authorizationHeader);
         authService.logout(bearerToken);

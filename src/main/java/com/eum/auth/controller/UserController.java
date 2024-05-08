@@ -8,6 +8,7 @@ import com.eum.auth.service.KakaoService;
 import com.eum.auth.service.UsersService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +24,7 @@ public class UserController {
     private final UsersService usersService;
     private final KakaoService kakaoService;
     private final AuthService authService;
+    @Hidden
     @Transactional
     @PostMapping("/withdrawal")
     public void withdrawal(@RequestHeader(name = HttpHeaders.AUTHORIZATION) String authorizationHeader, @RequestHeader("userId") String userId) throws FirebaseAuthException {
