@@ -82,7 +82,7 @@ public class AuthController {
         if(getUser.getSocialType() == SocialType.KAKAO){
             kakaoService.logout(getUser.getUid()); //카카오와 연결 끊기
         } else if (getUser.getSocialType() == SocialType.FIREBASE) {
-            FirebaseAuth.getInstance().deleteUser(getUser.getUid()); //파이어베이스에 저장된 유저정보 제거
+//            FirebaseAuth.getInstance().deleteUser(getUser.getUid()); //파이어베이스에 저장된 유저정보 제거
         }
         // Extract Bearer token from Authorization header
         String bearerToken = extractBearerToken(authorizationHeader);
