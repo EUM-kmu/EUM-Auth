@@ -56,17 +56,18 @@ jobs:
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.5.4
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: Add remote server to known hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-      - name: SCP transfer
-        run: scp *.jar ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:~/cicd
-      - name: Execute remote commands
-        run: |
-          ssh -v ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "sudo fuser -k 8080/tcp || true"
-          ssh -v ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "nohup /home/shane/.sdkman/candidates/java/current/bin/java -jar ~/cicd/*.jar  > ~/cicd/nohup.log 2>&1 &"
+          host: ${{ secrets.SERVER_IP }}          
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: | 
+            sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+            sudo docker stop $(sudo docker ps -a -q)
+            sudo docker rm -f $(sudo docker ps -a -q)
+            sudo docker pull ${{ secrets.DOCKER_REPO }}/tagname
+            sudo docker run -d -p 8081:8081 ${{ secrets.DOCKER_REPO }}/tagname
+            sudo docker image prune -f
+            ps -ef | grep java
     # - name: Deploy
     #   uses: appleboy/ssh-action@master
     #   with:
