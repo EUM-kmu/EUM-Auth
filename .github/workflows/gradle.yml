@@ -29,7 +29,7 @@ jobs:
         distribution: 'temurin'
     - name: Set YML
       run: |
-        echo "${{ secrets.APPLICATION }}" > src/main/resources/application.yml
+        echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > src/main/resources/application.yml
         find src
 
     # Configure Gradle for optimal use in GiHub Actions, including caching of downloaded dependencies.
