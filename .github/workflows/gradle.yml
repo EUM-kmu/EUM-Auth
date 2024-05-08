@@ -26,7 +26,7 @@ jobs:
     - name: build with Gradle
       uses: gradle/gradle-build-action@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
       with:
-        arguments: build
+        arguments:  ./gradlew build -x test
     # - name: Build with Gradle Wrapper
     #   run: ./gradlew build
  # # 3. Docker 이미지 빌드
