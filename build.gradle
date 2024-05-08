@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.2'
     id 'io.spring.dependency-management' version '1.1.4'
+    id "org.asciidoctor.jvm.convert" version "3.3.2"
 }
 
 group = 'com.eum'
@@ -28,7 +29,33 @@ repositories {
 
 ext {
     set('springCloudVersion', "2023.0.0")
+    snippetsDir = file('build/generated-snippets')
 }
+asciidoctor {
+    dependsOn test
+    attributes 'snippets': snippetsDir
+    inputs.dir snippetsDir
+    outputDir file('build/docs/html') // Output directory for HTML files
+}
+
+asciidoctor.doFirst { // add
+    println("---------------- delete present asciidoctor.")
+    delete file('src/main/resources/static/docs')
+}
+
+bootJar { // ad
+    dependsOn asciidoctor
+    copy {
+        from("${asciidoctor.outputDir}")
+        into 'src/main/resources/static/docs'
+    }
+}
+
+test { // 필수
+    outputs.dir snippetsDir
+    useJUnitPlatform()
+}
+
 
 dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
@@ -62,8 +89,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.security:spring-security-test'
-}
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 
+}
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
@@ -73,3 +101,4 @@ dependencyManagement {
 tasks.named('test') {
     useJUnitPlatform()
 }
+

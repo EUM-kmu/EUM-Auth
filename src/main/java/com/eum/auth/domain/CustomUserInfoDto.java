@@ -11,10 +11,10 @@ import lombok.*;
 public class CustomUserInfoDto {
     Long userId;
     String uid;
-    String email;
     String password;
     boolean isBanned;
     Role role;
     boolean isDeleted;
+    Long previousUserId;
 
 }

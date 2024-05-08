@@ -25,8 +25,6 @@ public class FirebaseConfig {
 
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .setStorageBucket("eum-app.appspot.com")
-                .setDatabaseUrl("https://k-eum2023-default-rtdb.asia-southeast1.firebasedatabase.app")
                 .build();
 
        FirebaseApp app = FirebaseApp.initializeApp(options);
@@ -40,9 +38,4 @@ public class FirebaseConfig {
         return firebaseAuth;
     }
 
-    @Bean
-    public DatabaseReference firebaseDatabaseReference() throws IOException {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance(firebaseApp()).getReference();
-        return databaseReference;
-    }
 }

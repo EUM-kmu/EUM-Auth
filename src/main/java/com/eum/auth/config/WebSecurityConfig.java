@@ -1,10 +1,7 @@
 package com.eum.auth.config;
 
-import com.eum.auth.config.jwt.JwtAuthenticationFilter;
-import com.eum.auth.config.jwt.JwtTokenProvider;
 import com.eum.auth.handler.CustomAccessDenierHandler;
 import com.eum.auth.handler.CustomAuthenticationEntryPoint;
-import com.eum.auth.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,15 +15,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
 public class WebSecurityConfig {
-    private final CustomUserDetailsService customUserDetailsService;
-    private final JwtTokenProvider jwtTokenProvider;
     private final CustomAccessDenierHandler accessDenierHandler;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
@@ -46,8 +40,6 @@ public class WebSecurityConfig {
         http.formLogin((form) -> form.disable());
         http.httpBasic(AbstractHttpConfigurer::disable);
 
-        http.addFilterBefore(new JwtAuthenticationFilter( redisTemplate,jwtTokenProvider,customUserDetailsService), UsernamePasswordAuthenticationFilter.class);
-
         http.exceptionHandling((exceptionHandling )
                 -> exceptionHandling
                 .authenticationEntryPoint(authenticationEntryPoint)
@@ -55,9 +47,6 @@ public class WebSecurityConfig {
         );
 
         http.authorizeHttpRequests(authorize -> authorize
-//                .requestMatchers(HttpMethod.POST,"/api/v1/profile").hasAuthority(Role.ROLE_UNPROFILE_USER.toString())
-//                .requestMatchers(HttpMethod.POST,"/api/v1/bank-account/password").hasAuthority(Role.ROLE_UNPASSWORD_USER.toString())
-//                .requestMatchers("/api/v1/**").hasAuthority(Role.ROLE_USER.toString())
                 .requestMatchers(AUTH_WHITELIST).permitAll()
                 .anyRequest().authenticated());
         return http.build();

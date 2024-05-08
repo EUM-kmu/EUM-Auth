@@ -1,11 +1,15 @@
 package com.eum.auth.config.jwt;
 
-import com.eum.auth.controller.DTO.response.UsersResponse;
+import com.eum.auth.controller.DTO.response.ProfileResponseDTO;
+import com.eum.auth.controller.DTO.response.UserResponse;
 import com.eum.auth.domain.CustomUserInfoDto;
 import com.eum.auth.domain.user.Role;
+import com.eum.auth.domain.user.User;
 import com.eum.auth.domain.user.UserRepository;
 import com.eum.auth.exception.TokenException;
 import com.eum.auth.service.CustomUserDetailsService;
+import com.eum.auth.service.ProfileService;
+import com.eum.auth.service.UsersService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -25,6 +29,8 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+import static com.eum.auth.domain.user.Role.ROLE_USER;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -35,6 +41,8 @@ public class JwtTokenProvider {
     private static final String UID = "uid";
     private static final String ROLE = "role";
     private static final String BEARER_TYPE = "Bearer";
+    private static final String PREVIOUS_USERID = "previousUserId";
+    private static final String DELETED = "deleted";
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 12 * 60 * 60 * 1000L;
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000L;    // 7일
     @Autowired
@@ -42,102 +50,77 @@ public class JwtTokenProvider {
     private final Key key;
     @Autowired
     private UserRepository usersRepository;
+    @Autowired
+    private  ProfileService profileService;
 
     public JwtTokenProvider(){
         byte[] keyBytes = Decoders.BASE64.decode("VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHN");
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public UsersResponse.TokenInfo generateToken(Authentication authentication) {
+    public UserResponse.TokenInfo generateToken(Authentication authentication) {
         // 권한 가져오기
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
+        User user = usersRepository.findById(Long.valueOf(authentication.getName())).orElseThrow(() -> new IllegalArgumentException("Invalid userId"));
 
-        long now = (new Date()).getTime();
-        // Access Token 생성
-        Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
-        String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim(AUTHORITIES_KEY, authorities)
-                .setExpiration(accessTokenExpiresIn)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-
-        // Refresh Token 생성
-        String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-
-        return UsersResponse.TokenInfo.builder()
-                .grantType(BEARER_TYPE)
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .refreshTokenExpirationTime(REFRESH_TOKEN_EXPIRE_TIME)
-                .build();
-    }
-    public UsersResponse.TokenInfo generateToken(CustomUserInfoDto user, Role role) {
         Claims claims = Jwts.claims();
         claims.put(USER_ID, user.getUserId());
         claims.put(UID, user.getUid());
         claims.put(ROLE, user.getRole());
+        claims.put(PREVIOUS_USERID, user.getPreviousUserId());
+        claims.put(DELETED, user.isDeleted());
+
+        UserResponse.TokenInfo tokenInfo = generateToken(user.getUserId(),user.getRole(), claims);
+        if(user.getRole().equals(ROLE_USER)) {
+            ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(tokenInfo.getUserId()));
+            tokenInfo.setNickName(profileResponse.getNickName());
+        }
+        return tokenInfo;
+    }
+    public UserResponse.TokenInfo generateToken(CustomUserInfoDto user,Role role) {
+        log.info(String.valueOf(user.getPreviousUserId()));
+        Claims claims = Jwts.claims();
+        claims.put(USER_ID, user.getUserId());
+        claims.put(UID, user.getUid());
+        claims.put(ROLE, user.getRole());
+        claims.put(PREVIOUS_USERID, user.getPreviousUserId());
+        claims.put(DELETED, user.isDeleted());
 //        log.info(claims.get("userId",Long.class).toString());
         // Check if the user has the TEST role
-//        if (getUser.getRole() == Role.TEST) {
-//            // Set the access token expiration time to infinity for TEST users
-//            long now = (new Date()).getTime();
-//            Date accessTokenExpiresIn = new Date(Long.MAX_VALUE);
-//
-//            // Generate the access token
-//            String accessToken = Jwts.builder()
-//                    .setSubject(email)
-//                    .claim(AUTHORITIES_KEY, "authorities")
-//                    .setExpiration(accessTokenExpiresIn)
-//                    .signWith(key, SignatureAlgorithm.HS256)
-//                    .compact();
-//
-//            // Generate the refresh token
-//            String refreshToken = Jwts.builder()
-//                    .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
-//                    .signWith(key, SignatureAlgorithm.HS256)
-//                    .compact();
-//
-//            return UsersResponseDTO.TokenInfo.builder()
-//                    .grantType(BEARER_TYPE)
-//                    .accessToken(accessToken)
-//                    .refreshToken(refreshToken)
-//                    .refreshTokenExpirationTime(REFRESH_TOKEN_EXPIRE_TIME)
-//                    .role(role)
-//                    .build();
-//        } else {
-//            // Generate the access and refresh tokens normally for non-TEST users
-            ZonedDateTime now = ZonedDateTime.now();
-            ZonedDateTime accessTokenExpiresIn = now.plusSeconds( ACCESS_TOKEN_EXPIRE_TIME);
-            ZonedDateTime refreshTokenExpiresIn = now.plusSeconds( REFRESH_TOKEN_EXPIRE_TIME);
+        if (user.getUserId() == 2L || user.getUserId() == 3L || (user.getUserId()> 14L && user.getUserId() < 29L)) {
+            // Set the access token expiration time to infinity for TEST users
+            log.info(user.getRole().toString());
+            long now = (new Date()).getTime();
+            Date accessTokenExpiresIn = new Date(Long.MAX_VALUE);
 
             // Generate the access token
             String accessToken = Jwts.builder()
                     .setClaims(claims)
-                    .setIssuedAt(Date.from(now.toInstant()))
                     .setExpiration(Date.from(accessTokenExpiresIn.toInstant()))
                     .signWith(key, SignatureAlgorithm.HS256)
                     .compact();
 
             // Generate the refresh token
             String refreshToken = Jwts.builder()
-                    .setExpiration(Date.from(refreshTokenExpiresIn.toInstant()))
+                    .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
                     .signWith(key, SignatureAlgorithm.HS256)
                     .compact();
 
-            return UsersResponse.TokenInfo.builder()
+            return UserResponse.TokenInfo.builder()
                     .grantType(BEARER_TYPE)
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
                     .refreshTokenExpirationTime(REFRESH_TOKEN_EXPIRE_TIME)
                     .role(role)
                     .build();
-//        }
+        } else {
+            // Generate the access and refresh tokens normally for non-TEST users
+            UserResponse.TokenInfo tokenInfo = generateToken(user.getUserId(),role, claims);
+//            if(user.getRole().equals(ROLE_USER)) {
+//                ProfileResponseDTO.ProfileResponse profileResponse = profileService.getProfile(String.valueOf(tokenInfo.getUserId()));
+//                tokenInfo.setNickName(profileResponse.getNickName());
+//            }
+            return tokenInfo;
+        }
     }
 
     // JWT 토큰을 복호화하여 토큰에 들어있는 정보를 꺼내는 메서드
@@ -192,6 +175,26 @@ public class JwtTokenProvider {
         // 현재 시간
         Long now = new Date().getTime();
         return (expiration.getTime() - now);
+    }
+    private UserResponse.TokenInfo generateToken(Long userId, Role role,Claims claims){
+        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime accessTokenExpiresIn = now.plusSeconds( ACCESS_TOKEN_EXPIRE_TIME);
+        ZonedDateTime refreshTokenExpiresIn = now.plusSeconds( REFRESH_TOKEN_EXPIRE_TIME);
+
+        String accessToken = Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(Date.from(now.toInstant()))
+                .setExpiration(Date.from(accessTokenExpiresIn.toInstant()))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        // Generate the refresh token
+        String refreshToken = Jwts.builder()
+                .setExpiration(Date.from(refreshTokenExpiresIn.toInstant()))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+        return UserResponse.toTokenInfo(BEARER_TYPE, userId, accessToken, refreshToken, REFRESH_TOKEN_EXPIRE_TIME, role);
+
     }
 
 }

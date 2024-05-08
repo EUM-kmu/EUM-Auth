@@ -91,20 +91,39 @@ public class KakaoService {
             //Gson 라이브러리로 JSON파싱
             JsonParser parser = new JsonParser();
             JsonElement element = parser.parse(result);
-
-            boolean hasEmail = element.getAsJsonObject().get("kakao_account").getAsJsonObject().get("has_email").getAsBoolean();
-            if(hasEmail){
-                uid = element.getAsJsonObject().get("id").getAsString();
-                email = element.getAsJsonObject().get("kakao_account").getAsJsonObject().get("email").getAsString();
-
-            }
+            uid = element.getAsJsonObject().get("id").getAsString();
             br.close();
-            KakaoDTO.KaKaoInfo kaKaoInfo = KakaoDTO.KaKaoInfo.builder().uid(uid).email(email).build();
+            KakaoDTO.KaKaoInfo kaKaoInfo = KakaoDTO.KaKaoInfo.builder().uid(uid).build();
         return kaKaoInfo;
 
         } catch (IOException e) {
             e.printStackTrace();
             throw new TokenException("카카오 엑세스 토큰 오류");
+        }
+    }
+
+    public void logout(String uid){
+        String reqURL = "https://kapi.kakao.com/v1/user/logout";
+        Long longUid = Long.valueOf(uid);
+        try {
+            URL url = new URL(reqURL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            conn.setRequestProperty("Authorization", "KakaoAK " + ADMIN_KEY); //전송할 header 작성, access_token전송
+            String data = "target_id_type=user_id&target_id=" + longUid;
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = data.getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+
+            // 응답 코드 확인
+            int responseCode = conn.getResponseCode();
+            System.out.println("Response Code: " + responseCode);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
     public void WithdralKakao(String uid) {
