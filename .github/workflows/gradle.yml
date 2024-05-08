@@ -56,17 +56,17 @@ jobs:
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.5.4
         with:
-          ssh-private-key: ${{ secrets.REMOTE_SSH_KEY }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Add remote server to known hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan ${{ secrets.REMOTE_IP }} >> ~/.ssh/known_hosts
+          ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
       - name: SCP transfer
         run: scp *.jar ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:~/cicd
       - name: Execute remote commands
         run: |
-          ssh -v ${{ secrets.REMOTE_SSH_ID }}@${{ secrets.REMOTE_IP }} "sudo fuser -k 8080/tcp || true"
-          ssh -v ${{ secrets.REMOTE_SSH_ID }}@${{ secrets.REMOTE_IP }} "nohup /home/shane/.sdkman/candidates/java/current/bin/java -jar ~/cicd/*.jar  > ~/cicd/nohup.log 2>&1 &"
+          ssh -v ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "sudo fuser -k 8080/tcp || true"
+          ssh -v ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "nohup /home/shane/.sdkman/candidates/java/current/bin/java -jar ~/cicd/*.jar  > ~/cicd/nohup.log 2>&1 &"
     # - name: Deploy
     #   uses: appleboy/ssh-action@master
     #   with:
