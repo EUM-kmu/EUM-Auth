@@ -19,7 +19,7 @@ public class RedisRepositoryConfig {
     // lettuce
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory(redisProperties.getHost(), redisProperties.getPort());
+        return new LettuceConnectionFactory("10.30.68.152", 6379);
     }
 
     @Bean
