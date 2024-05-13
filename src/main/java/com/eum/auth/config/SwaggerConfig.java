@@ -15,7 +15,7 @@ import java.util.List;
 @Configuration
 public class SwaggerConfig {
     @Bean
-    public OpenAPI  customOpenAPI(@Value("${openapi.service.url}") String url) {
+    public OpenAPI  customOpenAPI() {
         String securityJwtName = "JWT";
         SecurityRequirement securityRequirement = new SecurityRequirement().addList("JWT");
         Components components = new Components().addSecuritySchemes(securityJwtName, new SecurityScheme()
@@ -26,7 +26,6 @@ public class SwaggerConfig {
 
 
         return new OpenAPI()
-                .servers(List.of(new Server().url(url)))
                 .addSecurityItem(securityRequirement)
                 .components(components)
                 .info(apiInfo());
