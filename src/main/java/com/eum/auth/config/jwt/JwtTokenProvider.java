@@ -103,6 +103,7 @@ public class JwtTokenProvider {
                     .compact();
 
             return UserResponse.TokenInfo.builder()
+                    .userId(user.getUserId())
                     .grantType(BEARER_TYPE)
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
