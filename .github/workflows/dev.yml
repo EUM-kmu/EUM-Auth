@@ -38,7 +38,7 @@ jobs:
         find src
     - name: Set firebase
       run: |
-        echo "${{ secrets.FIREBASE_JSON }}" | base64 --decode > src/main/resources/firebase.json
+        echo "${{ secrets.FIREBASE_JSON }}"  > src/main/resources/firebase.json
         find src
 
     - name: Build with Gradle Wrapper
