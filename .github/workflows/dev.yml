@@ -39,7 +39,7 @@ jobs:
 
     - name: Set firebase
       run: |
-        echo "${{ secrets.FIREBASE_JSON }}"  > src/main/resources/firebase.json
+        echo "${{ toJson(secrets.FIREBASE_JSON) }}"  > src/main/resources/firebase.json
         cat src/main/resources/firebase.json
 
 
