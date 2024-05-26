@@ -36,10 +36,10 @@ jobs:
       run: |
         echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > src/main/resources/application.yml
         find src
-    - name: Set firebase
-      run: |
-        echo "${{ secrets.FIREBASE_JSON }}" | base64 --decode > src/main/resources/firebase.json
-        find src
+#    - name: Set firebase
+#      run: |
+#        echo "${{ secrets.FIREBASE_JSON }}" | base64 --decode > src/main/resources/firebase.json
+#        find src
 
     - name: Build with Gradle Wrapper
       run: ./gradlew build -x test
