@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "haetsal-service", url = "http://localhost:8000/haetsal-service/api/v2/profile")
+@FeignClient(name = "haetsal-service", url = "http://175.45.203.201:8000/haetsal-service/api/v2/profile")
 public interface HaetsalClient {
     @PostMapping()
     ProfileResponseDTO.ProfileResponse createProfile(@RequestBody ProfileRequest.CreateProfile createProfile, @RequestHeader("userId") String userId);
