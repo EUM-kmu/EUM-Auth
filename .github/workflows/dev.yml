@@ -88,6 +88,6 @@ jobs:
               sudo docker rm auth
             fi
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/eum-dev:auth
-            sudo docker run -d --restart always -p 8081:8081 --network test_network --name auth ${{ secrets.DOCKERHUB_USERNAME }}/eum-dev:auth
+            sudo docker run -d --restart always -p 8081:8081 --network root_eum_network --name auth ${{ secrets.DOCKERHUB_USERNAME }}/eum-dev:auth
             sudo docker image prune -f
             ps -ef | grep java
