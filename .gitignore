@@ -32,7 +32,7 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
-#/src/main/resources/firebase.json
+/src/main/resources/firebase.json
 
 ### VS Code ###
 .vscode/
