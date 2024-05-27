@@ -73,9 +73,9 @@ jobs:
       -  name: Deploy
          uses: appleboy/ssh-action@v0.1.6
          with:
-           host: ${{ secrets.DEV_SSH_IP }}
-           username: ${{ secrets.DEV_SSH_USER }}
-           key: ${{ secrets.DEV_SSH_PASSWORD }}
+           host: ${{ secrets.SSH_IP }}
+           username: ${{ secrets.SSH_USER }}
+           key: ${{ secrets.SSH_PASSWORD }}
            port: 22
            script: |
              sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
