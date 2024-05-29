@@ -88,6 +88,9 @@ jobs:
               sudo docker rm auth
             fi
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/eum-dev:auth
-            sudo docker run -d --restart always -p 8081:8081 --network root_eum_network --name auth ${{ secrets.DOCKERHUB_USERNAME }}/eum-dev:auth
+            sudo docker run -d --restart always -p 8081:8081 --network root_eum_network --name auth --log-opt max-size=1024m --log-opt max-file=5 ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKER_REPO }}:auth
+            sudo docker image prune -f
+            ps -ef | grep java
+
             sudo docker image prune -f
             ps -ef | grep java
