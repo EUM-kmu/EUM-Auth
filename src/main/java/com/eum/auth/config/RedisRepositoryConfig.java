@@ -19,7 +19,7 @@ public class RedisRepositoryConfig {
     // lettuce
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory("redis-eum", 6379);
+        return new LettuceConnectionFactory("localhost", 6379);
     }
 
     @Bean
