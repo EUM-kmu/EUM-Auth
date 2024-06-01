@@ -39,6 +39,7 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
+
     public static User toEntity(String uid, SocialType socialType){
         return User.builder().email("")
                 .role(Role.ROLE_TEMPORARY_USER)
