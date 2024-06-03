@@ -12,24 +12,24 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class FcmProducer {
+public class FcmDeletedProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
-    public static String TOPIC = "eum-fcm-create";
+    public static String TOPIC = "eum-fcm-delete";
 
-    public FcmTokenDTO.FCMDTO send( FcmTokenDTO.FCMDTO fcmdto) {
+    public FcmTokenDTO.deletedToken send( FcmTokenDTO.deletedToken user) {
         ObjectMapper mapper = new ObjectMapper();
         String jsonInString = "";
 //        주문 정보 Json 포맷
         try {
-            jsonInString = mapper.writeValueAsString(fcmdto);
+            jsonInString = mapper.writeValueAsString(user);
         } catch(JsonProcessingException ex) {
             ex.printStackTrace();
         }
 
         kafkaTemplate.send(TOPIC, jsonInString);
-        log.info("create producer >> : " + fcmdto);
+        log.info("producer >> : " + user);
 
-        return fcmdto;
+        return user;
     }
 }

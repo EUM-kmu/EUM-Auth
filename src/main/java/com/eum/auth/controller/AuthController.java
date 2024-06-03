@@ -66,6 +66,8 @@ public class AuthController {
     @PostMapping("/auth/signin/local")
     public ResponseEntity<APIResponse<UserResponse.TokenInfo>> signIn(@RequestBody @Validated UsersRequest.SignIn signIn){
         UserResponse.TokenInfo tokenInfo = authService.signIn(signIn);
+        log.info(signIn.getFcmToken());
+        if(!signIn.getFcmToken().equals("")) fcmService.updateFcmToken(tokenInfo.getUserId(),signIn.getFcmToken());
         return ResponseEntity.ok( APIResponse.of(SuccessCode.SELECT_SUCCESS,tokenInfo));
     }
 
@@ -120,6 +122,7 @@ public class AuthController {
             socialType = SocialType.FIREBASE;
         }
         UserResponse.TokenInfo tokenInfo = authService.getToken( uid, socialType);
+        if(!token.getFcmToken().equals("")) fcmService.updateFcmToken(tokenInfo.getUserId(),token.getFcmToken());
         APIResponse response = APIResponse.of(SuccessCode.SELECT_SUCCESS, tokenInfo);
 //        log.info(token.);
         return ResponseEntity.ok(response);

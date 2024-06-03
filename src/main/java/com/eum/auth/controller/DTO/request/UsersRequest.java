@@ -14,6 +14,8 @@ public class UsersRequest {
     public static class Token{
         @NotEmpty
         private String token;
+
+        private String fcmToken;
     }
     //자체 로그인 폼
     @Getter
@@ -25,6 +27,8 @@ public class UsersRequest {
 
         @NotEmpty(message = "비밀번호는 필수 입력값입니다.")
         private String password;
+
+        private String fcmToken;
 
         public UsernamePasswordAuthenticationToken toAuthentication(){
             return new UsernamePasswordAuthenticationToken(testmail, password);
