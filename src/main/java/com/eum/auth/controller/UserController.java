@@ -53,7 +53,7 @@ public class UserController {
     }
     @PostMapping("notification")
     public ResponseEntity<APIResponse> updateFcm(@RequestBody FcmTokenRequest token, @RequestHeader("userId") String userId){
-        if(!token.getFcmToken().equals("") && token.getFcmToken() != null) fcmService.updateFcmToken( Long.valueOf(userId),token.getFcmToken());
+        if(token.getFcmToken() != null && !token.getFcmToken().equals("") ) fcmService.updateFcmToken( Long.valueOf(userId),token.getFcmToken());
         return ResponseEntity.ok(APIResponse.of(SuccessCode.UPDATE_SUCCESS, "fcm 토큰 등록"));
     }
 
