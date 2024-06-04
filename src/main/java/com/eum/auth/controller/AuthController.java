@@ -67,7 +67,7 @@ public class AuthController {
     public ResponseEntity<APIResponse<UserResponse.TokenInfo>> signIn(@RequestBody @Validated UsersRequest.SignIn signIn){
         UserResponse.TokenInfo tokenInfo = authService.signIn(signIn);
         log.info(signIn.getFcmToken());
-        if(!signIn.getFcmToken().equals("")) fcmService.updateFcmToken(tokenInfo.getUserId(),signIn.getFcmToken());
+        if(!signIn.getFcmToken().equals("") && signIn.getFcmToken() != null) fcmService.updateFcmToken(tokenInfo.getUserId(),signIn.getFcmToken());
         return ResponseEntity.ok( APIResponse.of(SuccessCode.SELECT_SUCCESS,tokenInfo));
     }
 
@@ -122,7 +122,7 @@ public class AuthController {
             socialType = SocialType.FIREBASE;
         }
         UserResponse.TokenInfo tokenInfo = authService.getToken( uid, socialType);
-        if(!token.getFcmToken().equals("")) fcmService.updateFcmToken(tokenInfo.getUserId(),token.getFcmToken());
+        if(!token.getFcmToken().equals("") && token.getFcmToken()!=null) fcmService.updateFcmToken(tokenInfo.getUserId(),token.getFcmToken());
         APIResponse response = APIResponse.of(SuccessCode.SELECT_SUCCESS, tokenInfo);
 //        log.info(token.);
         return ResponseEntity.ok(response);
