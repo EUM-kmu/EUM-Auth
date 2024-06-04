@@ -1,6 +1,7 @@
 package com.eum.auth.domain.user;
 
 import com.eum.auth.common.BaseTimeEntity;
+import com.eum.auth.domain.fcmtoken.FcmToken;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -38,6 +39,11 @@ public class User extends BaseTimeEntity {
     @Column
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
+
+    @OneToOne(mappedBy = "user")
+    private FcmToken fcmToken;
+
+
 
     public static User toEntity(String uid, SocialType socialType){
         return User.builder().email("")

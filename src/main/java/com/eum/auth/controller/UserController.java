@@ -1,9 +1,13 @@
 package com.eum.auth.controller;
 
+import com.eum.auth.common.DTO.APIResponse;
+import com.eum.auth.common.DTO.enums.SuccessCode;
+import com.eum.auth.controller.DTO.request.FcmTokenRequest;
 import com.eum.auth.controller.DTO.request.UsersRequest;
 import com.eum.auth.domain.user.SocialType;
 import com.eum.auth.domain.user.User;
 import com.eum.auth.service.AuthService;
+import com.eum.auth.service.FcmService;
 import com.eum.auth.service.KakaoService;
 import com.eum.auth.service.UsersService;
 import com.google.firebase.auth.FirebaseAuth;
@@ -12,6 +16,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +29,7 @@ public class UserController {
     private final UsersService usersService;
     private final KakaoService kakaoService;
     private final AuthService authService;
+    private final FcmService fcmService;
     @Hidden
     @Transactional
     @PostMapping("/withdrawal")
@@ -44,6 +50,11 @@ public class UserController {
             return authorizationHeader.substring(7);
         }
         return null;
+    }
+    @PostMapping("notification")
+    public ResponseEntity<APIResponse> updateFcm(@RequestBody FcmTokenRequest token, @RequestHeader("userId") String userId){
+        if(!token.getFcmToken().equals("")) fcmService.updateFcmToken( Long.valueOf(userId),token.getFcmToken());
+        return ResponseEntity.ok(APIResponse.of(SuccessCode.UPDATE_SUCCESS, "fcm 토큰 등록"));
     }
 
 

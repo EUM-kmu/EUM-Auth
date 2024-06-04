@@ -73,6 +73,8 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 
+    implementation 'org.springframework.kafka:spring-kafka:3.1.0'
+
 }
 dependencyManagement {
     imports {

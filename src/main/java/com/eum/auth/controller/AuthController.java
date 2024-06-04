@@ -10,7 +10,9 @@ import com.eum.auth.domain.user.Role;
 import com.eum.auth.domain.user.SocialType;
 import com.eum.auth.domain.user.User;
 import com.eum.auth.service.AuthService;
+import com.eum.auth.service.DTO.FcmTokenDTO;
 import com.eum.auth.service.DTO.KakaoDTO;
+import com.eum.auth.service.FcmService;
 import com.eum.auth.service.KakaoService;
 import com.eum.auth.service.UsersService;
 import com.google.firebase.auth.FirebaseAuth;
@@ -39,6 +41,7 @@ public class AuthController {
     private final AuthService authService;
     private final KakaoService kakaoService;
     private final UsersService usersService;
+    private final FcmService fcmService;
     @Hidden
     @GetMapping()
     public String get(){
@@ -62,7 +65,10 @@ public class AuthController {
 
     @PostMapping("/auth/signin/local")
     public ResponseEntity<APIResponse<UserResponse.TokenInfo>> signIn(@RequestBody @Validated UsersRequest.SignIn signIn){
-        return ResponseEntity.ok(authService.signIn(signIn));
+        UserResponse.TokenInfo tokenInfo = authService.signIn(signIn);
+        log.info(signIn.getFcmToken());
+        if(!signIn.getFcmToken().equals("")) fcmService.updateFcmToken(tokenInfo.getUserId(),signIn.getFcmToken());
+        return ResponseEntity.ok( APIResponse.of(SuccessCode.SELECT_SUCCESS,tokenInfo));
     }
 
     @PostMapping("/auth/reissue")
@@ -87,6 +93,7 @@ public class AuthController {
         // Extract Bearer token from Authorization header
         String bearerToken = extractBearerToken(authorizationHeader);
         authService.logout(bearerToken);
+        fcmService.deleteFcmToken(getUser.getUserId());
 
         // Pass the Bearer token to the logout method
         return ResponseEntity.ok( APIResponse.of(SuccessCode.UPDATE_SUCCESS,"로그아웃 되었습니다."));
@@ -115,6 +122,7 @@ public class AuthController {
             socialType = SocialType.FIREBASE;
         }
         UserResponse.TokenInfo tokenInfo = authService.getToken( uid, socialType);
+        if(!token.getFcmToken().equals("")) fcmService.updateFcmToken(tokenInfo.getUserId(),token.getFcmToken());
         APIResponse response = APIResponse.of(SuccessCode.SELECT_SUCCESS, tokenInfo);
 //        log.info(token.);
         return ResponseEntity.ok(response);
