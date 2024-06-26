@@ -31,9 +31,11 @@ ext {
     set('springCloudVersion', "2023.0.0")
     snippetsDir = file('build/generated-snippets')
 }
-test { // 필수
-    outputs.dir snippetsDir
-    useJUnitPlatform()
+asciidoctor {
+    dependsOn test
+    attributes 'snippets': snippetsDir
+    inputs.dir snippetsDir
+    outputDir file('build/docs/html') // Output directory for HTML files
 }
 
 
@@ -70,6 +72,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+
+    implementation 'org.springframework.kafka:spring-kafka:3.1.0'
 
 }
 dependencyManagement {

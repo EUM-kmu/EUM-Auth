@@ -41,7 +41,7 @@ public class AuthService {
      * @param signIn
      * @return
      */
-    public APIResponse<UserResponse.TokenInfo> signIn(UsersRequest.SignIn signIn) {
+    public UserResponse.TokenInfo signIn(UsersRequest.SignIn signIn) {
         User getUser = userRepository.findByEmail(signIn.getTestmail()).orElseThrow(() -> new IllegalArgumentException("잘못된 이메일 정보"));
         if(!passwordEncoder.matches(signIn.getPassword(),getUser.getPassword())) throw new IllegalArgumentException("잘못된 비밀번호");
         CustomUserInfoDto userInfo = modelMapper.map(getUser, CustomUserInfoDto.class);
@@ -55,7 +55,7 @@ public class AuthService {
         redisTemplate.opsForValue()
                 .set("RT:" + getUser.getUserId(), tokenInfo.getRefreshToken(), tokenInfo.getRefreshTokenExpirationTime(), TimeUnit.MILLISECONDS);
 
-        return APIResponse.of(SuccessCode.SELECT_SUCCESS,tokenInfo);
+        return tokenInfo;
     }
 
     /**

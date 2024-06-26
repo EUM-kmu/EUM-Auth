@@ -1,6 +1,7 @@
 package com.eum.auth.domain.user;
 
 import com.eum.auth.common.BaseTimeEntity;
+import com.eum.auth.domain.fcmtoken.FcmToken;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,11 +21,11 @@ public class User extends BaseTimeEntity {
     private String email;
     private String password;
     private Boolean isBanned;
-    private boolean isDeleted;
+    private boolean deleted;
     private Long previousUserId;
 
     public void setDeleted() {
-        isDeleted = true;
+        deleted = true;
     }
 
     public void updateRole(Role role) {
@@ -39,12 +40,17 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
+    @OneToOne(mappedBy = "user")
+    private FcmToken fcmToken;
+
+
+
     public static User toEntity(String uid, SocialType socialType){
         return User.builder().email("")
                 .role(Role.ROLE_TEMPORARY_USER)
                 .previousUserId(-1L)
                 .uid(uid)
-                .isDeleted(false)
+                .deleted(false)
                 .isBanned(false)
                 .socialType(socialType).build();
     }
