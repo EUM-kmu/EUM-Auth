@@ -53,11 +53,6 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle' # gradle 의존성 캐싱
 
-#      - name: Set firebase
-#        run: |
-#          echo "${{ toJson(secrets.FIREBASE_JSON) }}"  > src/main/resources/firebase.json
-#          cat src/main/resources/firebase.json
-
       - name: Build with Gradle Wrapper
         run: ./gradlew build -x test
 
