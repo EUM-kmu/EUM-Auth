@@ -1,0 +1,21 @@
+feign-client:
+  url:
+    haetsal-service: ${HAETSAL_SERVICE_DEV_URL}
+
+kafka:
+  bootstrap-servers: ${KAFKA_DEV_BOOTSTRAP_SERVERS}
+
+spring:
+  datasource:
+    url: jdbc:mysql://${AUTH_DEV_DB_IP}:${AUTH_DEV_DB_PORT}/${AUTH_DEV_DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
+    username: ${AUTH_DEV_DB_USERNAME}
+    password: ${AUTH_DEV_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+logging:
+  level:
+    root: INFO
+    com.eum.auth: DEBUG
+    org.springframework:
+      web: DEBUG
+      security: INFO

@@ -1,0 +1,134 @@
+# 브랜치에 push 이벤트가 발생하면 실행된다. (pr merge 시에도 실햄)
+# 원격 서버에 Docker Image를 배포한다.
+
+name: push
+
+on:
+  push:
+    branches:
+      - dev
+      - eumdeploy
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      docker_tag: ${{ steps.set_docker_tag.outputs.docker_tag }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Docker Tag 정책: 커밋 SHA 해시의 앞 7자리
+      - name: Set Short Commit SHA for Docker Tag
+        id: set_docker_tag
+        run: echo "docker_tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Set DOCKER_REPO based on branch
+        run: |
+          BRANCH_NAME="${GITHUB_REF##*/}"
+
+          if [[ "$BRANCH_NAME" == "dev" ]]; then
+            echo "DOCKER_REPO=${{ secrets.DOCKER_REPO_DEV }}" >> $GITHUB_ENV
+          elif [[ "$BRANCH_NAME" == "eumdeploy" || "$BRANCH_NAME" == "main" ]]; then
+            echo "DOCKER_REPO=${{ secrets.DOCKER_REPO_PROD }}" >> $GITHUB_ENV
+          else
+            echo "Unsupported branch: $BRANCH_NAME"
+            exit 1
+          fi
+
+      - name: Check DOCKER_REPO zero-length
+        run: |
+          if [ -z "$DOCKER_REPO" ]; then
+            echo "DOCKER_REPO not set"
+            exit 1
+          fi
+
+      - name: Set up JDK 17 with Gradle cache
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle' # gradle 의존성 캐싱
+
+      - name: Build with Gradle Wrapper
+        run: ./gradlew build -x test
+
+      - name: Docker Login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME_TP }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD_TP }}
+
+      - name: Docker Image Build
+        run: |
+          TAG="${{ steps.set_docker_tag.outputs.docker_tag }}"
+
+          docker build -t $DOCKER_REPO:$TAG .
+          docker tag $DOCKER_REPO:$TAG $DOCKER_REPO:latest
+
+      - name: Docker Hub push
+        run: |
+          TAG="${{ steps.set_docker_tag.outputs.docker_tag }}"
+
+          docker push $DOCKER_REPO:$TAG
+          docker push $DOCKER_REPO:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set environment variables based on branch
+        run: |
+          BRANCH_NAME="${GITHUB_REF##*/}"
+          
+          if [[ "$BRANCH_NAME" == "dev" ]]; then
+            echo "DOCKER_REPO=${{ secrets.DOCKER_REPO_DEV }}" >> $GITHUB_ENV
+            echo "SSH_HOST=${{ secrets.DEV_SSH_IP }}" >> $GITHUB_ENV
+            echo "SSH_USER=${{ secrets.DEV_SSH_USER }}" >> $GITHUB_ENV
+            echo "SSH_PASSWORD=${{ secrets.DEV_SSH_PASSWORD }}" >> $GITHUB_ENV
+            echo "DIR_PATH=dev-auth" >> $GITHUB_ENV
+            echo "PROFILES_ACTIVE=dev" >> $GITHUB_ENV
+          elif [[ "$BRANCH_NAME" == "eumdeploy" || "$BRANCH_NAME" == "main" ]]; then
+            echo "DOCKER_REPO=${{ secrets.DOCKER_REPO_PROD }}" >> $GITHUB_ENV
+            echo "SSH_HOST=${{ secrets.SSH_IP }}" >> $GITHUB_ENV
+            echo "SSH_USER=${{ secrets.SSH_USER }}" >> $GITHUB_ENV
+            echo "SSH_PASSWORD=${{ secrets.SSH_PASSWORD }}" >> $GITHUB_ENV
+            echo "DIR_PATH=auth" >> $GITHUB_ENV
+            echo "PROFILES_ACTIVE=prod" >> $GITHUB_ENV
+          fi
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          password: ${{ env.SSH_PASSWORD }}
+          script: |
+            DIR_PATH=${{ env.DIR_PATH }}
+            DOCKER_REPO=${{ env.DOCKER_REPO }}
+            TAG=${{ needs.build.outputs.docker_tag }}
+            PROFILES_ACTIVE=${{ env.PROFILES_ACTIVE }}
+            CONTAINER_NAME=auth
+            
+            set -e
+            docker login -u ${{ secrets.DOCKERHUB_USERNAME_TP }} -p ${{ secrets.DOCKERHUB_PASSWORD_TP }}
+            docker pull $DOCKER_REPO:$TAG
+            docker rm -f $CONTAINER_NAME || true
+            
+            cd $DIR_PATH
+            echo "${{ secrets.SPRING_ENV }}" > .env
+            
+            docker run -d -p 8081:8081 \
+              --network root_eum_network \
+              --name $CONTAINER_NAME \
+              --log-opt max-size=1024m \
+              --log-opt max-file=5 \
+              --env-file .env \
+              -e SPRING_PROFILES_ACTIVE=$PROFILES_ACTIVE \
+              $DOCKER_REPO:$TAG
+
+  #            docker image prune -a -f --filter "until=48h"

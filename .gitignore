@@ -34,3 +34,8 @@ out/
 /.nb-gradle/
 ### VS Code ###
 .vscode/
+
+### macOS ###
+.DS_Store
+
+.env
