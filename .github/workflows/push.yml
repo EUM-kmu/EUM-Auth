@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - dev
-      - dev-temp
       - eumdeploy
       - eumdeploy-temp
       - main
@@ -32,7 +31,7 @@ jobs:
         run: |
           BRANCH_NAME="${GITHUB_REF##*/}"
 
-          if [[ "$BRANCH_NAME" == "dev" || "$BRANCH_NAME" == "dev-temp" ]]; then
+          if [[ "$BRANCH_NAME" == "dev" ]]; then
             echo "DOCKER_REPO=${{ secrets.DOCKER_REPO_DEV }}" >> $GITHUB_ENV
           elif [[ "$BRANCH_NAME" == "eumdeploy" || "$BRANCH_NAME" == "eumdeploy-temp" || "$BRANCH_NAME" == "main" ]]; then
             echo "DOCKER_REPO=${{ secrets.DOCKER_REPO_PROD }}" >> $GITHUB_ENV
@@ -92,7 +91,7 @@ jobs:
         run: |
           BRANCH_NAME="${GITHUB_REF##*/}"
           
-          if [[ "$BRANCH_NAME" == "dev" || "$BRANCH_NAME" == "dev-temp" ]]; then
+          if [[ "$BRANCH_NAME" == "dev" ]]; then
             echo "DOCKER_REPO=${{ secrets.DOCKER_REPO_DEV }}" >> $GITHUB_ENV
             echo "SSH_HOST=${{ secrets.DEV_SSH_IP }}" >> $GITHUB_ENV
             echo "SSH_USER=${{ secrets.DEV_SSH_USER }}" >> $GITHUB_ENV
