@@ -1,0 +1,50 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: auth-service
+  cloud:
+    config:
+      uri: ${SPRING_CLOUD_URI}
+      name:
+      enabled: false
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.MySQLDialect # ??? ??
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect # ?? ?? ??
+    generate-ddl: true
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}  # 기본값 local
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_DEFAULTZONE}
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+kakao :
+  client-id: ${KAKAO_CLIENT_ID}
+  redirect-url: ${KAKAO_REDIRECT_URL}
+  admin-key: ${KAKAO_ADMIN_KEY}
+
+firebase:
+  type: ${FIREBASE_TYPE}
+  project_id: ${FIREBASE_PROJECT_ID}
+  private_key_id: ${FIREBASE_PRIVATE_KEY_ID}
+  private_key: ${FIREBASE_PRIVATE_KEY}
+  client_email: ${FIREBASE_CLIENT_EMAIL}
+  client_id: ${FIREBASE_CLIENT_ID}
+  auth_uri: ${FIREBASE_AUTH_URI}
+  token_uri: ${FIREBASE_TOKEN_URI}
+  auth_provider_x509_cert_url: ${FIREBASE_AUTH_PROVIDER_X509_CERT_URL}
+  client_x509_cert_url: ${FIREBASE_CLIENT_X509_CERT_URL}
+  universe_domain: ${FIREBASE_UNIVERSE_DOMAIN}
