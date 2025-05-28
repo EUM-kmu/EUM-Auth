@@ -1,0 +1,24 @@
+#로컬 개발 시 사용하는 YML
+#DB 정보를 .env에 작성해서 실행한다. feign-client와 kafka는 dev 서버 정보로 실행한다.
+
+feign-client:
+  url:
+    haetsal-service: ${HAETSAL_SERVICE_DEV_URL}
+
+kafka:
+  bootstrap-servers: ${KAFKA_DEV_BOOTSTRAP_SERVERS}
+
+spring:
+  datasource:
+    url: jdbc:mysql://${AUTH_LOCAL_DB_IP}:${AUTH_LOCAL_DB_PORT}/${AUTH_LOCAL_DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
+    username: ${AUTH_LOCAL_DB_USERNAME}
+    password: ${AUTH_LOCAL_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+logging:
+  level:
+    root: INFO
+    com.eum.auth: DEBUG
+    org.springframework:
+      web: DEBUG
+      security: INFO
