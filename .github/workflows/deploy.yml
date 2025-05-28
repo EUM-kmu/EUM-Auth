@@ -8,10 +8,10 @@
 name: Deploy action
 
 on:
-  push:
-    branches: [ "eumdeploy" ]
-  pull_request:
-    branches: [ "eumdeploy" ]
+#  push:
+#    branches: [ "eumdeploy" ]
+#  pull_request:
+#    branches: [ "eumdeploy" ]
 
 jobs:
   build:
